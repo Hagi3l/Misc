@@ -1,20 +1,33 @@
-# extract_findings.py
 import boto3
 import pandas as pd
 
-def extract_security_hub_findings():
-    # Create a Boto3 client for AWS Security Hub
-    client = boto3.client('securityhub', region_name='us-west-2')  # Update to your region
+def extract_findings(severity_levels, region_name='us-west-2'):
+    """
+    Extract findings from AWS Security Hub.
 
-    # Pagination for large result sets
-    paginator = client.get_paginator('get_findings')
+    :param severity_levels: List of severity levels to filter (e.g., ['CRITICAL', 'HIGH']).
+    :param region_name: AWS region to query.
+    :return: A Pandas DataFrame containing all findings.
+    """
+    client = boto3.client('securityhub', region_name=region_name)
     findings = []
+    
+    paginator = client.get_paginator('get_findings')
+    response_iterator = paginator.paginate(
+        Filters={
+            'SeverityLabel': {'Value': severity_levels, 'Comparison': 'IN'}
+        }
+    )
 
-    for page in paginator.paginate():
+    for page in response_iterator:
         findings.extend(page['Findings'])
 
-    # Create a DataFrame from the findings
-    df = pd.DataFrame(findings)
-    # Assuming these columns are available in the findings
-    df = df[['Id', 'Title', 'Description', 'Severity', 'Resource', 'FindingType']]
+    # Normalize findings into a DataFrame
+    df = pd.json_normalize(findings)
+
     return df
+
+# Example Usage
+severity_levels = ['CRITICAL', 'HIGH']  # Focus on critical and high findings for now
+findings_df = extract_findings(severity_levels)
+print(f"Extracted {len(findings_df)} findings")
