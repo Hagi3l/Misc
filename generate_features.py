@@ -1,27 +1,21 @@
-# generate_features.py
-import pandas as pd
+import uuid
 
-def generate_features(filtered_findings_df):
+def generate_features_csv(df, output_file='features.csv'):
     """
-    Generates Features for SecOps team and saves them into CSVs with unique tags.
-    :param filtered_findings_df: DataFrame of filtered findings (Critical/High)
-    :return: List of CSV filenames that contain the generated features
+    Generate a features CSV for SecOps.
+
+    :param df: DataFrame of findings.
+    :param output_file: Path to the output CSV.
+    :return: DataFrame with features.
     """
-    # Create Features DataFrame
-    features = pd.DataFrame({
-        'Tag': [f"feature-{finding_type}-{i}" for i, finding_type in enumerate(filtered_findings_df['FindingType'], 1)],  # Tag with severity and unique index
-        'Title': filtered_findings_df['Title'],  # Example title from findings
-        'Description': filtered_findings_df['Description'],  # Example description from findings
-    })
+    features = df[['GeneratorId', 'AwsAccountId']].drop_duplicates()
+    features['FeatureId'] = [str(uuid.uuid4()) for _ in range(len(features))]
+    features['Title'] = 'Security Finding Remediation'  # Generic title
+    features['Description'] = 'Actions required by SecOps team for remediation.'
 
-    # Generate chunks of features if over 1000 entries (Azure DevOps limit)
-    feature_chunks = [features[i:i+1000] for i in range(0, len(features), 1000)]
+    features.to_csv(output_file, index=False)
+    print(f"Features CSV generated: {output_file}")
+    return features
 
-    # Save Feature CSVs
-    feature_csv_files = []
-    for i, chunk in enumerate(feature_chunks):
-        file_name = f'features_chunk_{i+1}.csv'
-        chunk.to_csv(file_name, index=False)
-        feature_csv_files.append(file_name)
-
-    return feature_csv_files
+# Generate features
+features_df = generate_features_csv(deduplicated_findings)
