@@ -1,11 +1,14 @@
-# process_findings.py
-import pandas as pd
+def deduplicate_findings(df):
+    """
+    Deduplicate findings based on unique identifiers.
 
-def filter_and_deduplicate_findings(df):
-    # Filter for Critical and High severity findings
-    filtered_df = df[df['Severity'].isin(['Critical', 'High'])]
-
-    # Deduplicate based on the 'Id' of the findings
-    deduplicated_df = filtered_df.drop_duplicates(subset='Id')
-
+    :param df: DataFrame of findings.
+    :return: Deduplicated DataFrame.
+    """
+    # Use 'Id' as the unique identifier for findings
+    deduplicated_df = df.drop_duplicates(subset='Id')
     return deduplicated_df
+
+# Deduplicate findings
+deduplicated_findings = deduplicate_findings(findings_df)
+print(f"Deduplicated findings: {len(deduplicated_findings)}")
