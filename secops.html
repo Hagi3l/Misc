@@ -1,670 +1,903 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kanban Timeline Planner</title>
-  <style>
-    /* Reset and base styles */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    body {
-      background-color: #f5f5f5;
-      color: #333;
-    }
-
-    /* Layout */
-    .container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-
-    /* Header styles */
-    header {
-      background-color: #fff;
-      padding: 1rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .app-title {
-      color: #3b82f6;
-      font-size: 1.5rem;
-    }
-
-    .view-controls, .action-controls {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    button {
-      padding: 0.5rem 1rem;
-      border-radius: 0.375rem;
-      border: 1px solid #e5e7eb;
-      background-color: #fff;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      transition: all 0.2s;
-    }
-
-    button:hover {
-      background-color: #f9fafb;
-    }
-
-    button.active {
-      background-color: #dbeafe;
-      color: #1d4ed8;
-    }
-
-    button.primary {
-      background-color: #3b82f6;
-      color: white;
-      border: none;
-    }
-
-    button.primary:hover {
-      background-color: #2563eb;
-    }
-
-    button.success {
-      background-color: #10b981;
-      color: white;
-      border: none;
-    }
-
-    button.success:hover {
-      background-color: #059669;
-    }
-
-    button.icon {
-      padding: 0.5rem;
-    }
-
-    /* Main content area */
-    main {
-      flex: 1;
-      padding: 1.5rem;
-      overflow: auto;
-    }
-
-    /* Welcome screen */
-    .welcome-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-    }
-
-    .welcome-card {
-      background-color: white;
-      padding: 2rem;
-      border-radius: 0.5rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      text-align: center;
-      max-width: 28rem;
-    }
-
-    .welcome-card h2 {
-      margin-bottom: 1rem;
-    }
-
-    .welcome-card p {
-      margin-bottom: 1.5rem;
-      color: #666;
-    }
-
-    .welcome-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    /* Containers for views */
-    .view-container {
-      background-color: white;
-      padding: 1.5rem;
-      border-radius: 0.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    .view-header {
-      margin-bottom: 1rem;
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-
-    /* Timeline view styles */
-    .timeline-container {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .deliverable-card {
-      border: 1px solid #e5e7eb;
-      border-radius: 0.375rem;
-      padding: 1rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .deliverable-card:hover {
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .deliverable-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 0.5rem;
-    }
-
-    .deliverable-title {
-      font-weight: 500;
-      font-size: 1.125rem;
-    }
-
-    .deliverable-description {
-      color: #666;
-      font-size: 0.875rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .deliverable-dates {
-      font-size: 0.875rem;
-      color: #666;
-      margin-bottom: 0.5rem;
-    }
-
-    .tag {
-      display: inline-block;
-      padding: 0.25rem 0.5rem;
-      border-radius: 1rem;
-      font-size: 0.75rem;
-      margin-right: 0.25rem;
-    }
-
-    .status-tag {
-      padding: 0.25rem 0.5rem;
-      border-radius: 1rem;
-      font-size: 0.75rem;
-    }
-
-    .status-to-do {
-      background-color: #fef3c7;
-    }
-
-    .status-in-progress {
-      background-color: #dbeafe;
-    }
-
-    .status-completed {
-      background-color: #d1fae5;
-    }
-
-    .tag-assignee {
-      background-color: #dbeafe;
-      color: #1e40af;
-    }
-
-    .tag-priority {
-      background-color: #f3e8ff;
-      color: #7e22ce;
-    }
-
-    .tag-category {
-      background-color: #f3f4f6;
-      color: #4b5563;
-    }
-
-    /* Calendar view styles */
-    .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-
-    .calendar-navigation {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 0.25rem;
-    }
-
-    .calendar-day-header {
-      text-align: center;
-      font-weight: 500;
-      padding: 0.5rem;
-      background-color: #f3f4f6;
-    }
-
-    .calendar-day {
-      background-color: white;
-      border: 1px solid #e5e7eb;
-      padding: 0.5rem;
-      height: 8rem;
-      overflow: auto;
-    }
-
-    .calendar-day-number {
-      font-weight: 500;
-      margin-bottom: 0.25rem;
-    }
-
-    .calendar-event {
-      padding: 0.25rem;
-      margin-bottom: 0.25rem;
-      border-radius: 0.25rem;
-      font-size: 0.75rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      cursor: pointer;
-    }
-
-    .calendar-event-to-do {
-      background-color: #fef3c7;
-    }
-
-    .calendar-event-in-progress {
-      background-color: #dbeafe;
-    }
-
-    .calendar-event-completed {
-      background-color: #d1fae5;
-    }
-
-    /* Kanban view styles */
-    .kanban-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      height: 100%;
-    }
-
-    .kanban-column {
-      background-color: white;
-      padding: 1rem;
-      border-radius: 0.375rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .kanban-column-header {
-      font-weight: 600;
-      padding-bottom: 0.75rem;
-      margin-bottom: 0.75rem;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .kanban-column-content {
-      flex: 1;
-      overflow: auto;
-    }
-
-    .kanban-card {
-      background-color: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 0.375rem;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
-      cursor: pointer;
-    }
-
-    .kanban-card:hover {
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .kanban-card-title {
-      font-weight: 500;
-      margin-bottom: 0.25rem;
-    }
-
-    .kanban-card-description {
-      font-size: 0.875rem;
-      color: #666;
-      margin-bottom: 0.5rem;
-      /* Limit to 2 lines */
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    /* Modal styles */
-    .modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-      z-index: 50;
-    }
-
-    .modal {
-      background-color: white;
-      border-radius: 0.5rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      padding: 1.5rem;
-      width: 100%;
-      max-width: 32rem;
-    }
-
-    .modal-large {
-      max-width: 48rem;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-
-    .modal-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 1.25rem;
-    }
-
-    .modal-content {
-      margin-bottom: 1.5rem;
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.5rem;
-    }
-
-    /* Form styles */
-    .form-group {
-      margin-bottom: 1rem;
-    }
-
-    label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 500;
-      margin-bottom: 0.25rem;
-      color: #4b5563;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      font-size: 1rem;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 5rem;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
-    /* Hide file input */
-    .file-input {
-      display: none;
-    }
-
-    /* Detail view styles */
-    .detail-label {
-      font-size: 0.875rem;
-      color: #6b7280;
-      margin-bottom: 0.25rem;
-    }
-
-    .detail-value {
-      margin-bottom: 1rem;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    /* Export button */
-    .export-btn {
-      margin-left: auto;
-      margin-right: 0.5rem;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecOps Planner</title>
+<style>
+/* Gantt chart styles */
+  .gantt-container {
+    display: flex;
+    flex-direction: column;
+    overflow-x: auto;
+    background-color: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  
+  .gantt-header {
+    display: flex;
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 20;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .gantt-sidebar-header {
+    width: 240px;
+    min-width: 240px;
+    padding: 0.5rem;
+    font-weight: 600;
+    border-right: 1px solid #e5e7eb;
+    text-align: left;
+  }
+  
+  .gantt-timeline-header {
+    display: flex;
+    flex: 1;
+  }
+
+  .gantt-pi-highlight {
+    pointer-events: none;
+    border-left: 2px dashed rgba(0, 0, 0, 0.2);
+    border-right: 2px dashed rgba(0, 0, 0, 0.2);
+  }
+  
+  .gantt-pi-label {
+    pointer-events: none;
+  }
+  
+  .gantt-month {
+    flex: 1;
+    min-width: 120px;
+    padding: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    border-right: 1px solid #e5e7eb;
+  }
+  
+  .gantt-content {
+    display: flex;
+  }
+  
+  .gantt-sidebar {
+    width: 240px;
+    min-width: 240px;
+    border-right: 1px solid #e5e7eb;
+  }
+  
+  .gantt-timeline {
+    flex: 1;
+    position: relative;
+  }
+  
+        .gantt-row {
+    display: flex;
+    height: 40px;
+    border-bottom: 1px solid #f3f4f6;
+    position: relative;
+  }
+  
+  .gantt-task-info {
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  
+  .gantt-task-cell {
+    flex: 1;
+    min-width: 120px;
+    height: 100%;
+    border-right: 1px solid #f3f4f6;
+    position: relative;
+  }
+  
+  .gantt-task-bar {
+    position: absolute;
+    top: 10px;
+    height: 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: white;
+    padding: 0 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    z-index: 10;
+  }
+  
+  .gantt-bar-to-do {
+    background-color: #f59e0b;
+  }
+  
+  .gantt-bar-in-progress {
+    background-color: #3b82f6;
+  }
+  
+  .gantt-bar-completed {
+    background-color: #10b981;
+  }
+  
+  .gantt-today-line {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background-color: #ef4444;
+    z-index: 10;
+  }
+  
+  .gantt-legend {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: #f9fafb;
+    border-radius: 0.25rem;
+  }
+  
+  .gantt-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+  }
+  
+  .gantt-legend-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+  }
+  
+  .year-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .year-display {
+    font-weight: 600;
+    font-size: 1.25rem;
+  }
+    
+  /* Reset and base styles */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  body {
+    background-color: #f5f5f5;
+    color: #333;
+  }
+
+  /* Layout */
+  .container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* Header styles */
+  header {
+    background-color: #fff;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .app-title {
+    color: #3b82f6;
+    font-size: 1.5rem;
+  }
+
+  .view-controls, .action-controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  /* Button styles */
+  button {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    border: 1px solid #e5e7eb;
+    background-color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.2s;
+  }
+
+  button:hover {
+    background-color: #f9fafb;
+  }
+
+  button.active {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  button.primary {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+  }
+
+  button.primary:hover {
+    background-color: #2563eb;
+  }
+
+  button.success {
+    background-color: #10b981;
+    color: white;
+    border: none;
+  }
+
+  button.success:hover {
+    background-color: #059669;
+  }
+
+  button.icon {
+    padding: 0.5rem;
+  }
+
+  /* Main content area */
+  main {
+    flex: 1;
+    padding: 1.5rem;
+    overflow: auto;
+  }
+
+  /* Welcome screen */
+  .welcome-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
+
+  .welcome-card {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    text-align: center;
+    max-width: 28rem;
+  }
+
+  .welcome-card h2 {
+    margin-bottom: 1rem;
+  }
+
+  .welcome-card p {
+    margin-bottom: 1.5rem;
+    color: #666;
+  }
+
+  .welcome-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* Containers for views */
+  .view-container {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .view-header {
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  /* Timeline view styles */
+  .timeline-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .deliverable-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .deliverable-card:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .deliverable-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+  }
+
+  .deliverable-title {
+    font-weight: 500;
+    font-size: 1.125rem;
+  }
+
+  .deliverable-description {
+    color: #666;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .deliverable-dates {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    margin-right: 0.25rem;
+  }
+
+  .status-tag {
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+  }
+
+  .status-to-do {
+    background-color: #fef3c7;
+  }
+
+  .status-in-progress {
+    background-color: #dbeafe;
+  }
+
+  .status-completed {
+    background-color: #d1fae5;
+  }
+
+  .tag-assignee {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .tag-priority {
+    background-color: #f3e8ff;
+    color: #7e22ce;
+  }
+
+  .tag-category {
+    background-color: #f3f4f6;
+    color: #4b5563;
+  }
+
+  /* Calendar view styles */
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .calendar-navigation {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+    position: relative;
+  }
+
+  .calendar-day-header {
+    text-align: center;
+    font-weight: 500;
+    padding: 0.5rem;
+    background-color: #f3f4f6;
+  }
+
+  .calendar-day {
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    padding: 0.5rem;
+    height: 8rem;
+    overflow: visible;
+    position: relative;
+  }
+
+  .calendar-day-number {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+  }
+
+  .calendar-event {
+    padding: 0.25rem;
+    margin-bottom: 0.25rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .calendar-event-span {
+    position: absolute;
+    z-index: 10;
+    padding: 0.25rem 0.25rem 0.25rem 6px;
+    height: 1.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    min-width: 20px;
+  }
+  
+  .calendar-event-left {
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-right: 0;
+  }
+  
+  .calendar-event-middle {
+    border-radius: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  .calendar-event-right {
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: 0;
+  }
+  
+  .calendar-event-continues-left:before {
+    content: "◄";
+    position: absolute;
+    left: 2px;
+    top: 3px;
+    font-size: 0.6rem;
+  }
+  
+  .calendar-event-continues-right:after {
+    content: "►";
+    position: absolute;
+    right: 2px;
+    top: 3px;
+    font-size: 0.6rem;
+  }
+
+  .calendar-event-to-do {
+    background-color: #fef3c7;
+  }
+
+  .calendar-event-in-progress {
+    background-color: #dbeafe;
+  }
+
+  .calendar-event-completed {
+    background-color: #d1fae5;
+  }
+
+  /* Kanban view styles */
+  .kanban-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    height: 100%;
+  }
+
+  .kanban-column {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .kanban-column-header {
+    font-weight: 600;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .kanban-column-content {
+    flex: 1;
+    overflow: auto;
+  }
+
+  .kanban-card {
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+  }
+
+  .kanban-card:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .kanban-card-title {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+  }
+
+  .kanban-card-description {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    /* Limit to 2 lines */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Modal styles */
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 50;
+  }
+
+  .modal {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 32rem;
+  }
+
+  .modal-large {
+    max-width: 48rem;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+  }
+
+  .modal-content {
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  /* Form styles */
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: #4b5563;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 1rem;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 5rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  /* Hide file input */
+  .file-input {
+    display: none;
+  }
+
+  /* Detail view styles */
+  .detail-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+  }
+
+  .detail-value {
+    margin-bottom: 1rem;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  /* Export button */
+  .export-btn {
+    margin-left: auto;
+    margin-right: 0.5rem;
+  }
+  
+  /* Danger button */
+  button.danger {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+  }
+
+  button.danger:hover {
+    background-color: #dc2626;
+  }
+
+  /* Error message */
+  .error-message {
+    background-color: #fee2e2;
+    border: 1px solid #ef4444;
+    color: #b91c1c;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <!-- Header with navigation and buttons -->
-    <header>
-      <h1 class="app-title">Kanban Timeline Planner</h1>
-      
-      <!-- View switcher buttons -->
-      <div class="view-controls">
-        <button id="timeline-view-btn" class="active">
-          <span>Timeline</span>
-        </button>
-        <button id="calendar-view-btn">
-          <span>Calendar</span>
-        </button>
-        <button id="kanban-view-btn">
-          <span>Kanban</span>
-        </button>
-      </div>
-      
-      <!-- Action buttons -->
-      <div class="action-controls" id="action-buttons">
-        <button id="demo-file-btn" class="success">
-          <span>Download Demo CSV</span>
-        </button>
-        <label for="file-upload" class="primary" style="padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; display: flex; align-items: center; gap: 0.25rem;">
-          <span>Upload CSV</span>
-          <input id="file-upload" type="file" accept=".csv" class="file-input">
-        </label>
-      </div>
-    </header>
+<div class="container">
+  <!-- Header with navigation and buttons -->
+  <header>
+    <h1 class="app-title">SecOps Planner</h1>
     
-    <!-- Main content area -->
-    <main>
-      <!-- Welcome screen (initial view) -->
-      <div id="welcome-screen" class="welcome-screen">
-        <div class="welcome-card">
-          <h2>Welcome to Kanban Timeline Planner</h2>
-          <p>To get started, please upload a CSV file containing your project deliverables or download our demo file to see how it works.</p>
-          <div id="storage-notice" style="margin-bottom: 1rem; padding: 0.5rem; background-color: #fff8e6; border: 1px solid #ffd77a; border-radius: 0.25rem; font-size: 0.875rem; display: none;">
-            Note: Your browser's security settings may prevent saving data between sessions. Your data will be available only during this session.
-          </div>
-          <div class="welcome-actions">
-            <button id="welcome-demo-btn" class="success">
-              <span>Download Demo CSV</span>
-            </button>
-            <label for="welcome-file-upload" class="primary" style="padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
-              <span>Upload CSV</span>
-              <input id="welcome-file-upload" type="file" accept=".csv" class="file-input">
-            </label>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Timeline View -->
-      <div id="timeline-view" class="view-container hidden">
-        <h2 class="view-header">Project Timeline</h2>
-        <div id="timeline-container" class="timeline-container">
-          <!-- Deliverable cards will be added here dynamically -->
-        </div>
-      </div>
-      
-      <!-- Calendar View -->
-      <div id="calendar-view" class="view-container hidden">
-        <div class="calendar-header">
-          <h2 id="calendar-month-title" class="view-header">March 2025</h2>
-          <div class="calendar-navigation">
-            <button id="prev-month-btn" class="icon">◀</button>
-            <button id="next-month-btn" class="icon">▶</button>
-          </div>
-        </div>
-        <div id="calendar-grid" class="calendar-grid">
-          <!-- Calendar will be generated dynamically -->
-        </div>
-      </div>
-      
-      <!-- Kanban View -->
-      <div id="kanban-view" class="view-container hidden">
-        <div id="kanban-container" class="kanban-container">
-          <!-- Kanban columns -->
-          <div class="kanban-column">
-            <h3 class="kanban-column-header">To Do</h3>
-            <div id="kanban-todo" class="kanban-column-content">
-              <!-- Cards will be added here dynamically -->
-            </div>
-          </div>
-          
-          <div class="kanban-column">
-            <h3 class="kanban-column-header">In Progress</h3>
-            <div id="kanban-in-progress" class="kanban-column-content">
-              <!-- Cards will be added here dynamically -->
-            </div>
-          </div>
-          
-          <div class="kanban-column">
-            <h3 class="kanban-column-header">Completed</h3>
-            <div id="kanban-completed" class="kanban-column-content">
-              <!-- Cards will be added here dynamically -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
+    <!-- View switcher buttons -->
+    <div class="view-controls">
+      <button id="timeline-view-btn" class="active">
+        <span>Deliverables</span>
+      </button>
+      <button id="gantt-view-btn">
+        <span>Gantt</span>
+      </button>
+      <button id="kanban-view-btn">
+        <span>Kanban</span>
+      </button>
+    </div>
     
-    <!-- Add Deliverable Modal -->
-    <div id="add-modal" class="modal-backdrop hidden">
-      <div class="modal">
-        <div class="modal-header">
-          <h2 class="modal-title">Add New Deliverable</h2>
-          <button class="modal-close" data-close-modal>&times;</button>
+    <!-- Action buttons -->
+    <div class="action-controls" id="action-buttons">
+      <button id="demo-file-btn" class="success">
+        <span>Download Demo CSV</span>
+      </button>
+      <label for="file-upload" class="primary" style="padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; display: flex; align-items: center; gap: 0.25rem;">
+        <span>Upload CSV</span>
+        <input id="file-upload" type="file" accept=".csv" class="file-input">
+      </label>
+    </div>
+  </header>
+  
+  <!-- Main content area -->
+  <main>
+    <!-- Welcome screen (initial view) -->
+    <div id="welcome-screen" class="welcome-screen">
+      <div class="welcome-card">
+        <h2>Welcome to SecOps Planner</h2>
+        <p>To get started, please upload a CSV file containing your project deliverables or download our demo file to see how it works.</p>
+        <div id="storage-notice" style="margin-bottom: 1rem; padding: 0.5rem; background-color: #fff8e6; border: 1px solid #ffd77a; border-radius: 0.25rem; font-size: 0.875rem; display: none;">
+          Note: Your browser's security settings may prevent saving data between sessions. Your data will be available only during this session.
         </div>
-        <div class="modal-content">
-          <form id="add-deliverable-form">
-            <div class="form-group">
-              <label for="title">Title *</label>
-              <input type="text" id="title" name="title" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="description">Description</label>
-              <textarea id="description" name="description"></textarea>
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label for="start-date">Start Date *</label>
-                <input type="date" id="start-date" name="startDate" required>
-              </div>
-              
-              <div class="form-group">
-                <label for="end-date">End Date *</label>
-                <input type="date" id="end-date" name="endDate" required>
-              </div>
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label for="status">Status</label>
-                <select id="status" name="status">
-                  <option value="To Do">To Do</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Completed">Completed</option>
-                </select>
-              </div>
-              
-              <div class="form-group">
-                <label for="priority">Priority</label>
-                <select id="priority" name="priority">
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label for="assignee">Assignee</label>
-              <input type="text" id="assignee" name="assignee">
-            </div>
-            
-            <div class="form-group">
-              <label for="category">Category</label>
-              <input type="text" id="category" name="category">
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button data-close-modal>Cancel</button>
-          <button id="save-deliverable-btn" class="primary">Add Deliverable</button>
+        <div id="error-container"></div>
+        <div class="welcome-actions">
+          <button id="welcome-demo-btn" class="success">
+            <span>Download Demo CSV</span>
+          </button>
+          <label for="welcome-file-upload" class="primary" style="padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.25rem;">
+            <span>Upload CSV</span>
+            <input id="welcome-file-upload" type="file" accept=".csv" class="file-input">
+          </label>
         </div>
       </div>
     </div>
     
-    <!-- Detail View Modal -->
-    <div id="detail-modal" class="modal-backdrop hidden">
-      <div class="modal modal-large">
-        <div class="modal-header">
-          <h2 id="detail-title" class="modal-title">Deliverable Title</h2>
-          <button class="modal-close" data-close-modal>&times;</button>
+    <!-- Timeline View -->
+    <div id="timeline-view" class="view-container hidden">
+      <h2 class="view-header">Deliverables</h2>
+      <div id="timeline-container" class="timeline-container">
+        <!-- Deliverable cards will be added here dynamically -->
+      </div>
+    </div>
+    
+    <!-- Gantt View -->
+    <div id="gantt-view" class="view-container hidden">
+      <div class="year-selector">
+        <button id="prev-year-btn" class="icon">◀</button>
+        <div id="gantt-year" class="year-display">2025</div>
+        <button id="next-year-btn" class="icon">▶</button>
+      </div>
+
+      <div class="gantt-legend">
+        <div class="gantt-legend-item">
+          <div class="gantt-legend-color gantt-bar-to-do"></div>
+          <span>To Do</span>
         </div>
-        <div class="modal-content">
-          <div class="form-group">
-            <div class="detail-label">Description</div>
-            <div id="detail-description" class="detail-value">Description text</div>
-          </div>
-          
+        <div class="gantt-legend-item">
+          <div class="gantt-legend-color gantt-bar-in-progress"></div>
+          <span>In Progress</span>
+        </div>
+        <div class="gantt-legend-item">
+          <div class="gantt-legend-color gantt-bar-completed"></div>
+          <span>Completed</span>
+        </div>
+      </div>
+      
+      <div class="gantt-container">
+        <!-- Gantt chart will be dynamically generated here -->
+      </div>
+    </div>
+    
+    <!-- Kanban View -->
+    <div id="kanban-view" class="view-container hidden">
+      <div id="kanban-container" class="kanban-container">
+        <!-- Kanban columns -->
+        <div class="kanban-column">
+          <h3 class="kanban-column-header">To Do</h3>
+          <div id="kanban-todo" class="kanban-column-content">
+            <!-- Cards will be added here dynamically -->
           <div class="form-row">
             <div class="form-group">
-              <div class="detail-label">Start Date</div>
-              <div id="detail-start-date" class="detail-value">01/01/2025</div>
+              <label for="program-increment">Program Increment (PI)</label>
+              <select id="program-increment" name="programIncrement">
+                <option value="">None</option>
+                <option value="PI44">PI44 (30/04/2025 - 22/07/2025)</option>
+                <option value="PI45">PI45 (23/07/2025 - 14/10/2025)</option>
+                <option value="PI46">PI46 (15/10/2025 - 13/01/2026)</option>
+              </select>
             </div>
             
             <div class="form-group">
-              <div class="detail-label">End Date</div>
-              <div id="detail-end-date" class="detail-value">01/15/2025</div>
+              <label for="work-type">Work Type</label>
+              <input type="text" id="work-type" name="workType" placeholder="Feature, Bug, Tech Debt, etc.">
+            </div>
+          </div>
+        </div>
+        
+        <div class="kanban-column">
+          <h3 class="kanban-column-header">In Progress</h3>
+          <div id="kanban-in-progress" class="kanban-column-content">
+            <!-- Cards will be added here dynamically -->
+          </div>
+        </div>
+        
+        <div class="kanban-column">
+          <h3 class="kanban-column-header">Completed</h3>
+          <div id="kanban-completed" class="kanban-column-content">
+            <!-- Cards will be added here dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+ <!-- Add Deliverable Modal - Fixed structure -->
+<div id="add-modal" class="modal-backdrop hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Add New Deliverable</h2>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-content">
+        <form id="add-deliverable-form">
+          <div class="form-group">
+            <label for="title">Title *</label>
+            <input type="text" id="title" name="title" required>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="program-increment">Program Increment (PI)</label>
+              <select id="program-increment" name="programIncrement">
+                <option value="">None</option>
+                <option value="PI44">PI44 (30/04/2025 - 22/07/2025)</option>
+                <option value="PI45">PI45 (23/07/2025 - 14/10/2025)</option>
+                <option value="PI46">PI46 (15/10/2025 - 13/01/2026)</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="work-type">Work Type</label>
+              <input type="text" id="work-type" name="workType" placeholder="Feature, Bug, Tech Debt, etc.">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description"></textarea>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="start-date">Start Date *</label>
+              <input type="date" id="start-date" name="startDate" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="end-date">End Date *</label>
+              <input type="date" id="end-date" name="endDate" required>
             </div>
           </div>
           
           <div class="form-row">
             <div class="form-group">
-              <div class="detail-label">Status</div>
-              <select id="detail-status">
+              <label for="status">Status</label>
+              <select id="status" name="status">
                 <option value="To Do">To Do</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Completed">Completed</option>
@@ -672,741 +905,1248 @@
             </div>
             
             <div class="form-group">
-              <div class="detail-label">Priority</div>
-              <div id="detail-priority" class="detail-value">Medium</div>
+              <label for="priority">Priority</label>
+              <select id="priority" name="priority">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="assignee">Assignee</label>
+            <input type="text" id="assignee" name="assignee">
+          </div>
+          
+          <div class="form-group">
+            <label for="category">Category</label>
+            <input type="text" id="category" name="category">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button data-close-modal>Cancel</button>
+        <button id="save-deliverable-btn" class="primary">Add Deliverable</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Detail View Modal - Fixed structure -->
+  <div id="detail-modal" class="modal-backdrop hidden">
+    <div class="modal modal-large">
+      <div class="modal-header">
+        <h2 id="detail-title" class="modal-title">Deliverable Title</h2>
+        <button class="modal-close" data-close-modal>&times;</button>
+      </div>
+      <div class="modal-content">
+        <form id="edit-deliverable-form">
+          <div class="form-group">
+            <label for="detail-title-edit">Title</label>
+            <input type="text" id="detail-title-edit" name="title" required>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="detail-program-increment-edit">Program Increment (PI)</label>
+              <select id="detail-program-increment-edit" name="programIncrement">
+                <option value="">None</option>
+                <option value="PI44">PI44 (30/04/2025 - 22/07/2025)</option>
+                <option value="PI45">PI45 (23/07/2025 - 14/10/2025)</option>
+                <option value="PI46">PI46 (15/10/2025 - 13/01/2026)</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="detail-work-type-edit">Work Type</label>
+              <input type="text" id="detail-work-type-edit" name="workType" placeholder="Feature, Bug, Tech Debt, etc.">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="detail-description-edit">Description</label>
+            <textarea id="detail-description-edit" name="description"></textarea>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="detail-start-date-edit">Start Date</label>
+              <input type="date" id="detail-start-date-edit" name="startDate" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="detail-end-date-edit">End Date</label>
+              <input type="date" id="detail-end-date-edit" name="endDate" required>
             </div>
           </div>
           
           <div class="form-row">
             <div class="form-group">
-              <div class="detail-label">Assignee</div>
-              <div id="detail-assignee" class="detail-value">John Doe</div>
+              <label for="detail-status-edit">Status</label>
+              <select id="detail-status-edit" name="status">
+                <option value="To Do">To Do</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
             </div>
             
             <div class="form-group">
-              <div class="detail-label">Category</div>
-              <div id="detail-category" class="detail-value">Development</div>
+              <label for="detail-priority-edit">Priority</label>
+              <select id="detail-priority-edit" name="priority">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
             </div>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button id="export-csv-btn" class="success export-btn">Export to CSV</button>
-          <button data-close-modal class="primary">Close</button>
-        </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="detail-assignee-edit">Assignee</label>
+              <input type="text" id="detail-assignee-edit" name="assignee">
+            </div>
+            
+            <div class="form-group">
+              <label for="detail-category-edit">Category</label>
+              <input type="text" id="detail-category-edit" name="category">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button id="delete-deliverable-btn" class="danger">Delete</button>
+        <button id="export-csv-btn" class="success">Export to CSV</button>
+        <button id="save-edits-btn" class="primary">Save Changes</button>
+        <button data-close-modal>Cancel</button>
       </div>
     </div>
+  </div>
 
-  <script>
-    // Memory storage for environments without localStorage
-    const memoryStorage = {
-      _data: {},
-      setItem: function(id, val) { this._data[id] = String(val); },
-      getItem: function(id) { return this._data[id] === undefined ? null : this._data[id]; },
-      removeItem: function(id) { delete this._data[id]; },
-      clear: function() { this._data = {}; }
-    };
+<script>
+  // Memory storage for environments without localStorage
+  const memoryStorage = {
+    _data: {},
+    setItem: function(id, val) { this._data[id] = String(val); },
+    getItem: function(id) { return this._data[id] === undefined ? null : this._data[id]; },
+    removeItem: function(id) { delete this._data[id]; },
+    clear: function() { this._data = {}; }
+  };
 
-    // Main application class
-    class KanbanTimelinePlanner {
-      constructor() {
-        // State
-        this.deliverables = [];
-        this.currentView = 'timeline';
-        this.currentMonth = new Date();
-        this.selectedDeliverable = null;
-        this.fileUploaded = false;
-        this.storage = this.detectStorage();
-        
-        // Initialize the application
-        this.init();
-      }
+  // Main application class
+  class KanbanTimelinePlanner {
+    constructor() {
+      // State
+      this.deliverables = [];
+      this.currentView = 'timeline';
+      this.currentMonth = new Date();
+      this.ganttYear = new Date().getFullYear();
+      this.selectedDeliverable = null;
+      this.fileUploaded = false;
+      this.storage = this.detectStorage();
       
-      // Detect available storage method
-      detectStorage() {
+      // Program Increment date ranges
+      this.programIncrements = {
+        'PI44': {
+          start: new Date('2025-04-30'),
+          end: new Date('2025-07-22'),
+          color: 'rgba(234, 179, 8, 0.15)' // yellow with transparency
+        },
+        'PI45': {
+          start: new Date('2025-07-23'),
+          end: new Date('2025-10-14'),
+          color: 'rgba(59, 130, 246, 0.15)' // blue with transparency
+        },
+        'PI46': {
+          start: new Date('2025-10-15'),
+          end: new Date('2026-01-13'),
+          color: 'rgba(16, 185, 129, 0.15)' // green with transparency
+        }
+      };
+      
+      // Initialize the application
+      this.init();
+    }
+    
+    // Detect available storage method
+    detectStorage() {
+      try {
+        const testKey = '__storage_test__';
+        localStorage.setItem(testKey, testKey);
+        localStorage.removeItem(testKey);
+        return localStorage;
+      } catch (e) {
         try {
           const testKey = '__storage_test__';
-          localStorage.setItem(testKey, testKey);
-          localStorage.removeItem(testKey);
-          return localStorage;
+          sessionStorage.setItem(testKey, testKey);
+          sessionStorage.removeItem(testKey);
+          return sessionStorage;
         } catch (e) {
-          try {
-            const testKey = '__storage_test__';
-            sessionStorage.setItem(testKey, testKey);
-            sessionStorage.removeItem(testKey);
-            return sessionStorage;
-          } catch (e) {
-            return memoryStorage;
-          }
+          return memoryStorage;
         }
       }
+    }
+    
+    init() {
+      // Initialize view
+      this.showWelcomeScreen();
       
-      init() {
-        // Initialize view
-        this.showWelcomeScreen();
-        
-        // Set up event listeners
-        this.setupEventListeners();
-        
-        // Check storage availability
-        this.checkStorage();
-        
-        // Try to load data from storage
-        this.loadFromStorage();
+      // Set up event listeners
+      this.setupEventListeners();
+      
+      // Check storage availability
+      this.checkStorage();
+      
+      // Try to load data from storage
+      this.loadFromStorage();
+    }
+    
+    // Check storage status and show appropriate notice
+    checkStorage() {
+      const storageNotice = document.getElementById('storage-notice');
+      if (this.storage === memoryStorage || this.storage === sessionStorage) {
+        storageNotice.style.display = 'block';
+      } else {
+        storageNotice.style.display = 'none';
       }
+    }
+    
+    setupEventListeners() {
+      // View switching
+      document.getElementById('timeline-view-btn').addEventListener('click', () => this.switchView('timeline'));
+      document.getElementById('gantt-view-btn').addEventListener('click', () => this.switchView('gantt'));
+      document.getElementById('kanban-view-btn').addEventListener('click', () => this.switchView('kanban'));
       
-      // Check storage status and show appropriate notice
-      checkStorage() {
-        const storageNotice = document.getElementById('storage-notice');
-        if (this.storage === memoryStorage || this.storage === sessionStorage) {
-          storageNotice.style.display = 'block';
-        } else {
-          storageNotice.style.display = 'none';
+      // File handling
+      document.getElementById('file-upload').addEventListener('change', (e) => this.handleFileUpload(e));
+      document.getElementById('welcome-file-upload').addEventListener('change', (e) => this.handleFileUpload(e));
+      
+      // Demo file
+      document.getElementById('demo-file-btn').addEventListener('click', () => this.generateDemoFile());
+      document.getElementById('welcome-demo-btn').addEventListener('click', () => this.generateDemoFile());
+      
+      // Modal close buttons
+      document.querySelectorAll('[data-close-modal]').forEach(button => {
+        button.addEventListener('click', () => this.closeAllModals());
+      });
+      
+      // Save deliverable button
+      document.getElementById('save-deliverable-btn').addEventListener('click', () => this.addDeliverable());
+      
+      // Export CSV button
+      const exportBtn = document.getElementById('export-csv-btn');
+      exportBtn.addEventListener('click', () => this.exportToCSV());
+      
+      // Gantt view year navigation
+      document.getElementById('prev-year-btn').addEventListener('click', () => this.navigateGanttYear(-1));
+      document.getElementById('next-year-btn').addEventListener('click', () => this.navigateGanttYear(1));
+    }
+    
+    // Load data from storage
+    loadFromStorage() {
+      try {
+        const savedData = this.storage.getItem('kanbanTimelineData');
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          // Convert string dates back to Date objects
+          parsedData.forEach(item => {
+            item.startDate = new Date(item.startDate);
+            item.endDate = new Date(item.endDate);
+          });
+          this.deliverables = parsedData;
+          this.fileUploaded = true;
+          this.hideWelcomeScreen();
+          this.renderCurrentView();
+          this.showAddDeliverableButton();
         }
+      } catch (error) {
+        console.error('Error loading data from storage', error);
+      }
+    }
+    
+    // Save data to storage
+    saveToStorage() {
+      try {
+        this.storage.setItem('kanbanTimelineData', JSON.stringify(this.deliverables));
+      } catch (error) {
+        console.error('Error saving data to storage', error);
+      }
+    }
+    
+    // Switch between views
+    switchView(viewName) {
+      // Update active button
+      document.querySelectorAll('.view-controls button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`${viewName}-view-btn`).classList.add('active');
+      
+      // Hide all views
+      document.getElementById('timeline-view').classList.add('hidden');
+      document.getElementById('gantt-view').classList.add('hidden');
+      document.getElementById('kanban-view').classList.add('hidden');
+      
+      // Show selected view
+      document.getElementById(`${viewName}-view`).classList.remove('hidden');
+      
+      // Update state
+      this.currentView = viewName;
+      
+      // Render the view
+      this.renderCurrentView();
+    }
+    
+    // Render the current view
+    renderCurrentView() {
+      switch(this.currentView) {
+        case 'timeline':
+          this.renderTimelineView();
+          break;
+        case 'gantt':
+          this.renderGanttView();
+          break;
+        case 'kanban':
+          this.renderKanbanView();
+          break;
+      }
+    }
+    
+    // Navigate Gantt chart year
+    navigateGanttYear(direction) {
+      this.ganttYear += direction;
+      document.getElementById('gantt-year').textContent = this.ganttYear;
+      this.renderGanttView();
+    }
+    
+    // Render Gantt View
+    renderGanttView() {
+      const container = document.querySelector('.gantt-container');
+      container.innerHTML = '';
+      
+      // Get all deliverables that are at least partially in the selected year
+      const yearStart = new Date(this.ganttYear, 0, 1);
+      const yearEnd = new Date(this.ganttYear, 11, 31, 23, 59, 59, 999);
+      
+      const relevantDeliverables = this.deliverables.filter(d => {
+        const startDate = new Date(d.startDate);
+        const endDate = new Date(d.endDate);
+        return !(endDate < yearStart || startDate > yearEnd);
+      });
+      
+      // Sort deliverables by start date and then title
+      const sortedDeliverables = [...relevantDeliverables].sort((a, b) => {
+        const dateCompare = new Date(a.startDate) - new Date(b.startDate);
+        return dateCompare !== 0 ? dateCompare : a.title.localeCompare(b.title);
+      });
+      
+      if (sortedDeliverables.length === 0 && Object.keys(this.programIncrements).length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.textContent = 'No deliverables for this year. Add deliverables or change the year.';
+        emptyMessage.style.padding = '2rem';
+        emptyMessage.style.textAlign = 'center';
+        emptyMessage.style.color = '#666';
+        container.appendChild(emptyMessage);
+        return;
       }
       
-      setupEventListeners() {
-        // View switching
-        document.getElementById('timeline-view-btn').addEventListener('click', () => this.switchView('timeline'));
-        document.getElementById('calendar-view-btn').addEventListener('click', () => this.switchView('calendar'));
-        document.getElementById('kanban-view-btn').addEventListener('click', () => this.switchView('kanban'));
-        
-        // File handling
-        document.getElementById('file-upload').addEventListener('change', (e) => this.handleFileUpload(e));
-        document.getElementById('welcome-file-upload').addEventListener('change', (e) => this.handleFileUpload(e));
-        
-        // Demo file
-        document.getElementById('demo-file-btn').addEventListener('click', () => this.generateDemoFile());
-        document.getElementById('welcome-demo-btn').addEventListener('click', () => this.generateDemoFile());
-        
-        // Modal close buttons
-        document.querySelectorAll('[data-close-modal]').forEach(button => {
-          button.addEventListener('click', () => this.closeAllModals());
-        });
-        
-        // Save deliverable button
-        document.getElementById('save-deliverable-btn').addEventListener('click', () => this.addDeliverable());
-        
-        // Month navigation in calendar view
-        document.getElementById('prev-month-btn').addEventListener('click', () => this.navigateMonth(-1));
-        document.getElementById('next-month-btn').addEventListener('click', () => this.navigateMonth(1));
-        
-        // Status change in detail view
-        document.getElementById('detail-status').addEventListener('change', (e) => {
-          if (this.selectedDeliverable) {
-            this.changeDeliverableStatus(this.selectedDeliverable.id, e.target.value);
-          }
-        });
-        
-        // Export CSV button
-        const exportBtn = document.getElementById('export-csv-btn');
-        exportBtn.addEventListener('click', () => this.exportToCSV());
-      }
+      // Create the header with months
+      const header = document.createElement('div');
+      header.className = 'gantt-header';
       
-      // Load data from storage
-      loadFromStorage() {
-        try {
-          const savedData = this.storage.getItem('kanbanTimelineData');
-          if (savedData) {
-            const parsedData = JSON.parse(savedData);
-            // Convert string dates back to Date objects
-            parsedData.forEach(item => {
-              item.startDate = new Date(item.startDate);
-              item.endDate = new Date(item.endDate);
-            });
-            this.deliverables = parsedData;
-            this.fileUploaded = true;
-            this.hideWelcomeScreen();
-            this.renderCurrentView();
-            this.showAddDeliverableButton();
-          }
-        } catch (error) {
-          console.error('Error loading data from storage', error);
+      // Task name column header
+      const sidebarHeader = document.createElement('div');
+      sidebarHeader.className = 'gantt-sidebar-header';
+      sidebarHeader.textContent = 'Task';
+      header.appendChild(sidebarHeader);
+      
+      // Month column headers
+      const timelineHeader = document.createElement('div');
+      timelineHeader.className = 'gantt-timeline-header';
+      
+      const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+      
+      months.forEach(month => {
+        const monthElement = document.createElement('div');
+        monthElement.className = 'gantt-month';
+        monthElement.textContent = month;
+        timelineHeader.appendChild(monthElement);
+      });
+      
+      header.appendChild(timelineHeader);
+      container.appendChild(header);
+      
+      // Create the content section
+      const content = document.createElement('div');
+      content.className = 'gantt-content';
+      
+      // Create sidebar with task names
+      const sidebar = document.createElement('div');
+      sidebar.className = 'gantt-sidebar';
+      
+      // Create timeline grid
+      const timeline = document.createElement('div');
+      timeline.className = 'gantt-timeline';
+      
+      // Add Program Increment highlights if they're in the current year
+      Object.entries(this.programIncrements).forEach(([piName, piData]) => {
+        const { start, end, color } = piData;
+        
+        // Skip if the PI doesn't overlap with the current year
+        if (end < yearStart || start > yearEnd) return;
+        
+        // Calculate the visible portion of the PI within the current year
+        const visibleStart = new Date(Math.max(start.getTime(), yearStart.getTime()));
+        const visibleEnd = new Date(Math.min(end.getTime(), yearEnd.getTime()));
+        
+        // Calculate the percentage of the year for positioning
+        const yearMs = yearEnd.getTime() - yearStart.getTime();
+        const startOffset = (visibleStart.getTime() - yearStart.getTime()) / yearMs;
+        const duration = (visibleEnd.getTime() - visibleStart.getTime()) / yearMs;
+        
+        // Create PI background highlight
+        const piHighlight = document.createElement('div');
+        piHighlight.className = 'gantt-pi-highlight';
+        piHighlight.style.position = 'absolute';
+        piHighlight.style.left = `${startOffset * 100}%`;
+        piHighlight.style.width = `${duration * 100}%`;
+        piHighlight.style.height = '100%';
+        piHighlight.style.backgroundColor = color;
+        piHighlight.style.zIndex = '1';
+        piHighlight.title = `${piName}: ${this.formatDateAU(start)} - ${this.formatDateAU(end)}`;
+        
+        // Add a label to the highlight
+        const piLabel = document.createElement('div');
+        piLabel.className = 'gantt-pi-label';
+        piLabel.textContent = piName;
+        piLabel.style.position = 'absolute';
+        piLabel.style.top = '2px';
+        piLabel.style.left = '5px';
+        piLabel.style.fontSize = '0.75rem';
+        piLabel.style.fontWeight = 'bold';
+        piLabel.style.color = '#333';
+        piHighlight.appendChild(piLabel);
+        
+        timeline.appendChild(piHighlight);
+      });
+      
+      // For each task, create a row
+      sortedDeliverables.forEach(deliverable => {
+        // Create the task info section in the sidebar
+        const taskInfoRow = document.createElement('div');
+        taskInfoRow.className = 'gantt-row';
+        
+        const taskInfo = document.createElement('div');
+        taskInfo.className = 'gantt-task-info';
+        
+        // Display title with PI and Work Type if available
+        let taskTitle = deliverable.title;
+        if (deliverable.programIncrement) {
+          taskTitle = `[${deliverable.programIncrement}] ${taskTitle}`;
         }
-      }
-      
-      // Save data to storage
-      saveToStorage() {
-        try {
-          this.storage.setItem('kanbanTimelineData', JSON.stringify(this.deliverables));
-        } catch (error) {
-          console.error('Error saving data to storage', error);
-        }
-      }
-      
-      // Switch between views
-      switchView(viewName) {
-        // Update active button
-        document.querySelectorAll('.view-controls button').forEach(btn => {
-          btn.classList.remove('active');
-        });
-        document.getElementById(`${viewName}-view-btn`).classList.add('active');
-        
-        // Hide all views
-        document.getElementById('timeline-view').classList.add('hidden');
-        document.getElementById('calendar-view').classList.add('hidden');
-        document.getElementById('kanban-view').classList.add('hidden');
-        
-        // Show selected view
-        document.getElementById(`${viewName}-view`).classList.remove('hidden');
-        
-        // Update state
-        this.currentView = viewName;
-        
-        // Render the view
-        this.renderCurrentView();
-      }
-      
-      // Render the current view
-      renderCurrentView() {
-        switch(this.currentView) {
-          case 'timeline':
-            this.renderTimelineView();
-            break;
-          case 'calendar':
-            this.renderCalendarView();
-            break;
-          case 'kanban':
-            this.renderKanbanView();
-            break;
-        }
-      }
-      
-      // Show welcome screen
-      showWelcomeScreen() {
-        document.getElementById('welcome-screen').classList.remove('hidden');
-      }
-      
-      // Hide welcome screen
-      hideWelcomeScreen() {
-        document.getElementById('welcome-screen').classList.add('hidden');
-      }
-      
-      // Show Add Deliverable button
-      showAddDeliverableButton() {
-        const actionButtons = document.getElementById('action-buttons');
-        // Clear current buttons
-        actionButtons.innerHTML = '';
-        
-        // Add the new deliverable button
-        const addButton = document.createElement('button');
-        addButton.className = 'primary';
-        addButton.innerHTML = '<span>Add Deliverable</span>';
-        addButton.addEventListener('click', () => this.showAddModal());
-        actionButtons.appendChild(addButton);
-        
-        // Add export button
-        const exportButton = document.createElement('button');
-        exportButton.className = 'success';
-        exportButton.innerHTML = '<span>Export CSV</span>';
-        exportButton.addEventListener('click', () => this.exportToCSV());
-        actionButtons.appendChild(exportButton);
-      }
-      
-      // Handle file upload
-      handleFileUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        // Check if it's a CSV file
-        if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-          alert('Please upload a CSV file');
-          return;
+        if (deliverable.workType) {
+          taskTitle = `${taskTitle} (${deliverable.workType})`;
         }
         
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            // Parse CSV
-            const csvData = this.parseCSV(e.target.result);
-            
-            // Process the data
-            this.deliverables = csvData.map((item, index) => {
-              // Handle potential invalid dates by providing fallbacks
-              let startDate, endDate;
-              try {
-                startDate = new Date(item.startDate);
-                // Check if date is valid
-                if (isNaN(startDate.getTime())) {
-                  startDate = new Date(); // Today as fallback
-                }
-              } catch (e) {
-                startDate = new Date();
-              }
-              
-              try {
-                endDate = new Date(item.endDate);
-                // Check if date is valid
-                if (isNaN(endDate.getTime())) {
-                  // Add 7 days to start date as fallback
-                  endDate = new Date(startDate);
-                  endDate.setDate(startDate.getDate() + 7);
-                }
-              } catch (e) {
-                endDate = new Date(startDate);
-                endDate.setDate(startDate.getDate() + 7);
-              }
-              
-              return {
-                id: item.id || `task-${index + 1}`,
-                title: item.title || `Task ${index + 1}`,
-                description: item.description || '',
-                startDate: startDate,
-                endDate: endDate,
-                status: item.status || 'To Do',
-                assignee: item.assignee || '',
-                priority: item.priority || 'Medium',
-                category: item.category || ''
-              };
-            });
-            
-            // Save to storage
-            this.saveToStorage();
-            
-            // Update UI
-            this.fileUploaded = true;
-            this.hideWelcomeScreen();
-            this.switchView('timeline');
-            this.showAddDeliverableButton();
-          } catch (error) {
-            console.error('Error parsing CSV:', error);
-            alert('Error parsing CSV file. Please check the format and try again.');
-          }
+        taskInfo.textContent = taskTitle;
+        taskInfo.title = taskTitle;
+        taskInfoRow.appendChild(taskInfo);
+        
+        sidebar.appendChild(taskInfoRow);
+        
+        // Create the timeline cells for this task
+        const timelineRow = document.createElement('div');
+        timelineRow.className = 'gantt-row';
+        
+        // Calculate task bar position
+        const startDate = new Date(deliverable.startDate);
+        const endDate = new Date(deliverable.endDate);
+        
+        // Make sure dates are clamped to the current year if they extend beyond
+        const visibleStartDate = new Date(Math.max(startDate.getTime(), yearStart.getTime()));
+        const visibleEndDate = new Date(Math.min(endDate.getTime(), yearEnd.getTime()));
+        
+        // Calculate the percentage of the year for positioning
+        const yearMs = yearEnd.getTime() - yearStart.getTime();
+        const startOffset = (visibleStartDate.getTime() - yearStart.getTime()) / yearMs;
+        const duration = (visibleEndDate.getTime() - visibleStartDate.getTime()) / yearMs;
+        
+        // Add cells for each month
+        for (let i = 0; i < 12; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'gantt-task-cell';
+          timelineRow.appendChild(cell);
+        }
+        
+        // Create task bar element
+        const taskBar = document.createElement('div');
+        
+        // Determine status-based class
+        let statusClass = 'gantt-bar-to-do';
+        if (deliverable.status === 'Completed') statusClass = 'gantt-bar-completed';
+        else if (deliverable.status === 'In Progress') statusClass = 'gantt-bar-in-progress';
+        
+        taskBar.className = `gantt-task-bar ${statusClass}`;
+        
+        // Position the task bar absolutely within the task cell
+        taskBar.style.position = 'absolute';
+        taskBar.style.left = `${startOffset * 100}%`;
+        taskBar.style.width = `${Math.max(duration * 100, 0.5)}%`;
+        
+        // Task bar text and hover details
+        let tooltipText = `${deliverable.title} (${this.formatDateAU(startDate)} - ${this.formatDateAU(endDate)})`;
+        if (deliverable.programIncrement) {
+          tooltipText += ` | ${deliverable.programIncrement}`;
+        }
+        if (deliverable.workType) {
+          tooltipText += ` | ${deliverable.workType}`;
+        }
+        taskBar.title = tooltipText;
+        
+        // Only add text if bar is wide enough
+        if (duration > 0.05) {
+          taskBar.textContent = deliverable.title;
+        }
+        
+        // Add click handler
+        taskBar.onclick = (e) => {
+          e.stopPropagation(); // Prevent row click from triggering
+          this.showDetailModal(deliverable);
         };
         
-        reader.readAsText(file);
+        // Add task bar to the timeline row first, then add row to timeline
+        timelineRow.appendChild(taskBar);
+        timeline.appendChild(timelineRow);
+      });
+      
+      // Add today marker if current year
+      const today = new Date();
+      if (today.getFullYear() === this.ganttYear) {
+        const yearProgress = (today - yearStart) / (yearEnd - yearStart);
+        const todayLine = document.createElement('div');
+        todayLine.className = 'gantt-today-line';
+        todayLine.style.left = `${yearProgress * 100}%`;
+        todayLine.title = 'Today';
+        timeline.appendChild(todayLine);
       }
       
-      // Parse CSV data
-      parseCSV(csvText) {
-        // Simple CSV parser
-        const lines = csvText.split('\n');
-        const headers = lines[0].split(',').map(header => header.trim());
-        
-        return lines.slice(1).filter(line => line.trim() !== '').map(line => {
-          // Handle quoted values with commas inside
-          const values = [];
-          let inQuotes = false;
-          let currentValue = '';
+      content.appendChild(sidebar);
+      content.appendChild(timeline);
+      container.appendChild(content);
+    }
+    
+    // Show welcome screen
+    showWelcomeScreen() {
+      document.getElementById('welcome-screen').classList.remove('hidden');
+    }
+    
+    // Hide welcome screen
+    hideWelcomeScreen() {
+      document.getElementById('welcome-screen').classList.add('hidden');
+    }
+    
+    // Show Add Deliverable button
+    showAddDeliverableButton() {
+      const actionButtons = document.getElementById('action-buttons');
+      // Clear current buttons
+      actionButtons.innerHTML = '';
+      
+      // Add the new deliverable button
+      const addButton = document.createElement('button');
+      addButton.className = 'primary';
+      addButton.innerHTML = '<span>Add Deliverable</span>';
+      addButton.addEventListener('click', () => this.showAddModal());
+      actionButtons.appendChild(addButton);
+      
+      // Add export button
+      const exportButton = document.createElement('button');
+      exportButton.className = 'success';
+      exportButton.innerHTML = '<span>Export CSV</span>';
+      exportButton.addEventListener('click', () => this.exportToCSV());
+      actionButtons.appendChild(exportButton);
+    }
+    
+    // Parse date from multiple formats (prioritizing Australian format)
+    parseDate(dateString) {
+      if (!dateString) return new Date();
+      
+      // Try to detect if it's an Australian format (DD/MM/YYYY)
+      if (/^\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{4}$/.test(dateString)) {
+        // Split by any of the separators /, ., or -
+        const parts = dateString.split(/[\/\.-]/);
+        // Construct date with parts in the right order: year, month (0-indexed), day
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+      }
+      
+      // Handle ISO format (YYYY-MM-DD)
+      if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(dateString)) {
+        return new Date(dateString);
+      }
+      
+      // Fallback to standard Date parsing
+      const result = new Date(dateString);
+      
+      // Check if the date is valid
+      if (!isNaN(result.getTime())) {
+        return result;
+      }
+      
+      // Return today's date if all parsing fails
+      return new Date();
+    }
+    
+    // Format date in Australian format (DD/MM/YYYY)
+    formatDateAU(date) {
+      if (!(date instanceof Date)) return '';
+      
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      
+      return `${day}/${month}/${year}`;
+    }
+    
+    // Handle file upload
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // Check if it's a CSV file
+      if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+        this.showError('Please upload a CSV file');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          // Parse CSV with improved CSV parser
+          const csvData = this.parseCSVRobust(e.target.result);
           
-          for (let i = 0; i < line.length; i++) {
-            const char = line[i];
-            
-            if (char === '"') {
-              inQuotes = !inQuotes;
-            } else if (char === ',' && !inQuotes) {
-              values.push(currentValue.trim());
-              currentValue = '';
-            } else {
-              currentValue += char;
-            }
+          if (csvData.length === 0) {
+            this.showError('The CSV file appears to be empty or invalid.');
+            return;
           }
           
-          // Add the last value
-          values.push(currentValue.trim());
+          // Process the data
+          this.deliverables = csvData.map((item, index) => {
+            // Use our custom parseDate function to handle Australian date format
+            const startDate = this.parseDate(item.startDate);
+            
+            // For end date: if it's not provided, use start date + 7 days
+            let endDate;
+            if (item.endDate) {
+              endDate = this.parseDate(item.endDate);
+            } else {
+              endDate = new Date(startDate);
+              endDate.setDate(startDate.getDate() + 7);
+            }
+            
+            return {
+              id: item.id || `task-${index + 1}`,
+              title: item.title || `Task ${index + 1}`,
+              description: item.description || '',
+              startDate: startDate,
+              endDate: endDate,
+              status: item.status || 'To Do',
+              assignee: item.assignee || '',
+              priority: item.priority || 'Medium',
+              category: item.category || ''
+            };
+          });
           
-          // Create object from headers and values
+          // Clear any error messages
+          this.clearError();
+          
+          // Save to storage
+          this.saveToStorage();
+          
+          // Update UI
+          this.fileUploaded = true;
+          this.hideWelcomeScreen();
+          this.switchView('timeline');
+          this.showAddDeliverableButton();
+        } catch (error) {
+          console.error('Error parsing CSV:', error);
+          this.showError('Error parsing CSV file. Please check the format and try again.');
+        }
+      };
+      
+      reader.onerror = () => {
+        this.showError('Failed to read the file. Please try again.');
+      };
+      
+      reader.readAsText(file);
+    }
+    
+    // Show error message
+    showError(message) {
+      const errorContainer = document.getElementById('error-container');
+      errorContainer.innerHTML = `<div class="error-message">${message}</div>`;
+    }
+    
+    // Clear error message
+    clearError() {
+      const errorContainer = document.getElementById('error-container');
+      errorContainer.innerHTML = '';
+    }
+    
+    // Improved robust CSV parser
+    parseCSVRobust(csvText) {
+      // First, normalize line endings
+      const normalized = csvText.replace(/\r\n|\r/g, '\n');
+      const lines = normalized.split('\n');
+      
+      if (lines.length === 0) return [];
+      
+      // Get headers from the first line
+      const headers = this.parseCSVLine(lines[0]);
+      
+      // Process data rows
+      return lines.slice(1)
+        .filter(line => line.trim() !== '')
+        .map(line => {
+          const values = this.parseCSVLine(line);
           const entry = {};
+          
+          // Map values to headers
           headers.forEach((header, index) => {
-            entry[header] = values[index] ? values[index] : '';
-            // Remove quotes from quoted values
-            if (entry[header].startsWith('"') && entry[header].endsWith('"')) {
-              entry[header] = entry[header].slice(1, -1);
+            // Make sure we have a valid header name
+            if (header && header.trim() !== '') {
+              // Clean up the header name (remove quotes, trim whitespace)
+              const cleanHeader = header.replace(/^["']|["']$/g, '').trim();
+              entry[cleanHeader] = index < values.length ? values[index].trim() : '';
             }
           });
           
           return entry;
         });
-      }
+    }
+    
+    // Parse a single CSV line, handling quoted fields with commas correctly
+    parseCSVLine(line) {
+      const result = [];
+      let currentValue = '';
+      let inQuotes = false;
       
-      // Generate CSV content
-      generateCSV(data) {
-        // Get all possible headers
-        const allKeys = new Set();
-        data.forEach(item => {
-          Object.keys(item).forEach(key => allKeys.add(key));
-        });
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        const nextChar = i < line.length - 1 ? line[i + 1] : '';
         
-        // Create header row
-        const headers = Array.from(allKeys);
-        let csvContent = headers.join(',') + '\n';
-        
-        // Add data rows
-        data.forEach(item => {
-          const row = headers.map(header => {
-            let value = item[header] || '';
-            
-            // Format dates
-            if (header === 'startDate' || header === 'endDate') {
-              if (value instanceof Date) {
-                value = value.toISOString().split('T')[0];
-              }
-            }
-            
-            // Escape commas and quotes in values
-            if (value.toString().includes(',') || value.toString().includes('"')) {
-              value = `"${value.toString().replace(/"/g, '""')}"`;
-            }
-            
-            return value;
-          });
-          
-          csvContent += row.join(',') + '\n';
-        });
-        
-        return csvContent;
-      }
-      
-      // Export data to CSV
-      exportToCSV() {
-        if (this.deliverables.length === 0) {
-          alert('No data to export.');
-          return;
-        }
-        
-        const csvContent = this.generateCSV(this.deliverables);
-        const fileName = `kanban_timeline_export_${new Date().toISOString().slice(0, 10)}.csv`;
-        this.downloadCSV(csvContent, fileName);
-      }
-      
-      // Generate and download a demo CSV file
-      generateDemoFile() {
-        const demoData = [
-          {
-            id: 'task-1',
-            title: 'Project Kickoff',
-            description: 'Initial meeting with stakeholders',
-            startDate: new Date('2025-03-15'),
-            endDate: new Date('2025-03-15'),
-            status: 'Completed',
-            assignee: 'John Doe',
-            priority: 'High',
-            category: 'Meeting'
-          },
-          {
-            id: 'task-2',
-            title: 'Requirements Analysis',
-            description: 'Gather and document requirements',
-            startDate: new Date('2025-03-16'),
-            endDate: new Date('2025-03-20'),
-            status: 'In Progress',
-            assignee: 'Jane Smith',
-            priority: 'High',
-            category: 'Analysis'
-          },
-          {
-            id: 'task-3',
-            title: 'UI Design',
-            description: 'Create wireframes and mockups',
-            startDate: new Date('2025-03-21'),
-            endDate: new Date('2025-03-28'),
-            status: 'To Do',
-            assignee: 'Michael Johnson',
-            priority: 'Medium',
-            category: 'Design'
+        if (char === '"' && !inQuotes) {
+          // Start of quoted field
+          inQuotes = true;
+        } else if (char === '"' && inQuotes) {
+          // End of quoted field or escaped quote
+          if (nextChar === '"') {
+            // Escaped quote (double quote inside a quoted field)
+            currentValue += '"';
+            i++; // Skip the next quote
+          } else {
+            inQuotes = false;
           }
-        ];
-        
-        const csvContent = this.generateCSV(demoData);
-        this.downloadCSV(csvContent, 'kanban_timeline_demo.csv');
-      }
-      
-      // Download CSV file
-      downloadCSV(csvContent, filename) {
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        
-        link.setAttribute('href', url);
-        link.setAttribute('download', filename);
-        link.style.visibility = 'hidden';
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-      
-      // Show Add Deliverable modal
-      showAddModal() {
-        // Reset form
-        document.getElementById('add-deliverable-form').reset();
-        
-        // Set default dates
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('start-date').value = today;
-        document.getElementById('end-date').value = today;
-        
-        // Show modal
-        document.getElementById('add-modal').classList.remove('hidden');
-      }
-      
-      // Show Detail view modal
-      showDetailModal(deliverable) {
-        this.selectedDeliverable = deliverable;
-        
-        // Populate fields
-        document.getElementById('detail-title').textContent = deliverable.title;
-        document.getElementById('detail-description').textContent = deliverable.description || 'No description provided.';
-        document.getElementById('detail-start-date').textContent = deliverable.startDate.toLocaleDateString();
-        document.getElementById('detail-end-date').textContent = deliverable.endDate.toLocaleDateString();
-        document.getElementById('detail-status').value = deliverable.status;
-        document.getElementById('detail-priority').textContent = deliverable.priority || 'Not specified';
-        document.getElementById('detail-assignee').textContent = deliverable.assignee || 'Not assigned';
-        document.getElementById('detail-category').textContent = deliverable.category || 'No category';
-        
-        // Show modal
-        document.getElementById('detail-modal').classList.remove('hidden');
-      }
-      
-      // Close all modals
-      closeAllModals() {
-        document.getElementById('add-modal').classList.add('hidden');
-        document.getElementById('detail-modal').classList.add('hidden');
-      }
-      
-      // Add new deliverable
-      addDeliverable() {
-        const form = document.getElementById('add-deliverable-form');
-        
-        // Basic validation
-        if (!form.title.value || !form.startDate.value || !form.endDate.value) {
-          alert('Please fill out all required fields');
-          return;
+        } else if (char === ',' && !inQuotes) {
+          // End of field
+          result.push(currentValue);
+          currentValue = '';
+        } else {
+          // Regular character
+          currentValue += char;
         }
+      }
+      
+      // Add the last field
+      result.push(currentValue);
+      
+      return result;
+    }
+    
+    // Generate CSV content
+    generateCSV(data) {
+      // Get all possible headers
+      const allKeys = new Set();
+      data.forEach(item => {
+        Object.keys(item).forEach(key => {
+          // Skip the 'id' field as it's internal
+          if (key !== 'id') {
+            allKeys.add(key);
+          }
+        });
+      });
+      
+      // Create ordered header array with title first
+      const headers = Array.from(allKeys);
+      // Move important fields to the front
+      const priorityFields = ['title', 'description', 'startDate', 'endDate', 'status', 'assignee', 'priority', 'category'];
+      
+      priorityFields.forEach(field => {
+        if (headers.includes(field)) {
+          headers.splice(headers.indexOf(field), 1);
+        }
+      });
+      
+      // Add priority fields in order to the beginning
+      priorityFields.reverse().forEach(field => {
+        if (allKeys.has(field)) {
+          headers.unshift(field);
+        }
+      });
+      
+      // Create CSV header row
+      let csvContent = headers.join(',') + '\n';
+      
+      // Add data rows
+      data.forEach(item => {
+        const row = headers.map(header => {
+          let value = item[header] || '';
+          
+          // Format dates in Australian format (DD/MM/YYYY)
+          if (header === 'startDate' || header === 'endDate') {
+            if (value instanceof Date) {
+              value = this.formatDateAU(value);
+            }
+          }
+          
+          // Handle special characters (quotes, commas)
+          if (typeof value === 'string' && (value.includes(',') || value.includes('"') || value.includes('\n'))) {
+            // Escape quotes by doubling them and wrap in quotes
+            value = '"' + value.replace(/"/g, '""') + '"';
+          }
+          
+          return value;
+        });
         
-        // Create new deliverable
-        const newDeliverable = {
-          id: `task-${Date.now()}`, // Use timestamp for unique ID
-          title: form.title.value,
-          description: form.description.value,
-          startDate: new Date(form.startDate.value),
-          endDate: new Date(form.endDate.value),
-          status: form.status.value,
-          assignee: form.assignee.value,
-          priority: form.priority.value,
-          category: form.category.value
-        };
-        
-        // Add to list
-        this.deliverables.push(newDeliverable);
+        csvContent += row.join(',') + '\n';
+      });
+      
+      return csvContent;
+    }
+    
+    // Export data to CSV
+    exportToCSV() {
+      if (this.deliverables.length === 0) {
+        alert('No data to export.');
+        return;
+      }
+      
+      const csvContent = this.generateCSV(this.deliverables);
+      const fileName = `kanban_timeline_export_${new Date().toISOString().slice(0, 10)}.csv`;
+      this.downloadCSV(csvContent, fileName);
+    }
+    
+    // Generate and download a demo CSV file
+    generateDemoFile() {
+      const demoData = [
+        {
+          id: 'task-1',
+          title: 'Project Kickoff',
+          description: 'Initial meeting with stakeholders',
+          startDate: new Date('2025-03-15'),
+          endDate: new Date('2025-03-15'),
+          status: 'Completed',
+          assignee: 'John Doe',
+          priority: 'High',
+          category: 'Meeting'
+        },
+        {
+          id: 'task-2',
+          title: 'Requirements Analysis',
+          description: 'Gather and document requirements',
+          startDate: new Date('2025-03-16'),
+          endDate: new Date('2025-03-20'),
+          status: 'In Progress',
+          assignee: 'Jane Smith',
+          priority: 'High',
+          category: 'Analysis'
+        },
+        {
+          id: 'task-3',
+          title: 'UI Design',
+          description: 'Create wireframes and mockups',
+          startDate: new Date('2025-03-21'),
+          endDate: new Date('2025-03-28'),
+          status: 'To Do',
+          assignee: 'Michael Johnson',
+          priority: 'Medium',
+          category: 'Design'
+        },
+        {
+          id: 'task-4',
+          title: 'Frontend Development',
+          description: 'Implement UI components and functionality',
+          startDate: new Date('2025-03-29'),
+          endDate: new Date('2025-04-10'),
+          status: 'To Do',
+          assignee: 'Sarah Williams',
+          priority: 'Medium',
+          category: 'Development'
+        },
+        {
+          id: 'task-5',
+          title: 'Testing & QA',
+          description: 'Test functionality and fix issues',
+          startDate: new Date('2025-04-11'),
+          endDate: new Date('2025-04-18'),
+          status: 'To Do',
+          assignee: 'David Brown',
+          priority: 'High',
+          category: 'Testing'
+        }
+      ];
+      
+      const csvContent = this.generateCSV(demoData);
+      this.downloadCSV(csvContent, 'kanban_timeline_demo.csv');
+    }
+    
+    // Download CSV file
+    downloadCSV(csvContent, filename) {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+    
+    // Show Add Deliverable modal
+showAddModal() {
+  // Reset form
+  document.getElementById('add-deliverable-form').reset();
+  
+  // Set default dates
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('start-date').value = today;
+  document.getElementById('end-date').value = today;
+  
+  // Set up event listeners for the modal
+  this.setupModalEventListeners('add-modal', () => this.addDeliverable());
+  
+  // Show modal
+  document.getElementById('add-modal').classList.remove('hidden');
+}
+
+// Show Detail view modal with editable fields
+showDetailModal(deliverable) {
+  this.selectedDeliverable = deliverable;
+  
+  // Populate modal title
+  document.getElementById('detail-title').textContent = deliverable.title;
+  
+  // Populate form fields
+  document.getElementById('detail-title-edit').value = deliverable.title;
+  document.getElementById('detail-description-edit').value = deliverable.description || '';
+  
+  // Format dates for the date inputs (YYYY-MM-DD)
+  const startDateFormatted = deliverable.startDate.toISOString().split('T')[0];
+  const endDateFormatted = deliverable.endDate.toISOString().split('T')[0];
+  
+  document.getElementById('detail-start-date-edit').value = startDateFormatted;
+  document.getElementById('detail-end-date-edit').value = endDateFormatted;
+  document.getElementById('detail-status-edit').value = deliverable.status;
+  document.getElementById('detail-priority-edit').value = deliverable.priority || 'Medium';
+  document.getElementById('detail-assignee-edit').value = deliverable.assignee || '';
+  document.getElementById('detail-category-edit').value = deliverable.category || '';
+  
+  // Handle program increment and work type if they exist
+  if (document.getElementById('detail-program-increment-edit')) {
+    document.getElementById('detail-program-increment-edit').value = deliverable.programIncrement || '';
+  }
+  if (document.getElementById('detail-work-type-edit')) {
+    document.getElementById('detail-work-type-edit').value = deliverable.workType || '';
+  }
+  
+  // Set up event listeners for the modal
+  this.setupModalEventListeners('detail-modal', () => this.saveDeliverableEdits());
+  
+  // Show modal
+  document.getElementById('detail-modal').classList.remove('hidden');
+}
+
+// Set up event listeners for modals
+setupModalEventListeners(modalId, saveFunction) {
+  const modal = document.getElementById(modalId);
+  
+  // Set up close buttons
+  const closeButtons = modal.querySelectorAll('[data-close-modal]');
+  closeButtons.forEach(button => {
+    button.onclick = () => this.closeAllModals();
+  });
+  
+  // Set up save button
+  if (modalId === 'add-modal') {
+    const saveButton = document.getElementById('save-deliverable-btn');
+    saveButton.onclick = saveFunction;
+  } else if (modalId === 'detail-modal') {
+    const saveButton = document.getElementById('save-edits-btn');
+    saveButton.onclick = saveFunction;
+    
+    // Set up delete button
+    const deleteButton = document.getElementById('delete-deliverable-btn');
+    deleteButton.onclick = () => this.deleteDeliverable(this.selectedDeliverable.id);
+    
+    // Set up export button
+    const exportButton = document.getElementById('export-csv-btn');
+    exportButton.onclick = () => this.exportToCSV();
+  }
+  
+  // Close modal when clicking outside
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      this.closeAllModals();
+    }
+  });
+}
+
+// Close all modals
+closeAllModals() {
+  document.getElementById('add-modal').classList.add('hidden');
+  document.getElementById('detail-modal').classList.add('hidden');
+  
+  // Remove the selected deliverable reference
+  this.selectedDeliverable = null;
+}
+
+// Add new deliverable
+addDeliverable() {
+  const form = document.getElementById('add-deliverable-form');
+  
+  // Basic validation
+  if (!form.title.value || !form.startDate.value || !form.endDate.value) {
+    alert('Please fill out all required fields');
+    return;
+  }
+  
+  // Create new deliverable - using parseDate to support Australian date format
+  const newDeliverable = {
+    id: `task-${Date.now()}`, // Use timestamp for unique ID
+    title: form.title.value,
+    description: form.description.value,
+    startDate: this.parseDate(form.startDate.value),
+    endDate: this.parseDate(form.endDate.value),
+    status: form.status.value,
+    assignee: form.assignee.value,
+    priority: form.priority.value,
+    category: form.category.value
+  };
+  
+  // Add program increment and work type if they exist in the form
+  if (form.programIncrement) {
+    newDeliverable.programIncrement = form.programIncrement.value;
+  }
+  if (form.workType) {
+    newDeliverable.workType = form.workType.value;
+  }
+  
+  // Add to list
+  this.deliverables.push(newDeliverable);
+  
+  // Save to storage
+  this.saveToStorage();
+  
+  // Close modal and refresh view
+  this.closeAllModals();
+  this.renderCurrentView();
+}
+
+// Save edited deliverable
+saveDeliverableEdits() {
+  if (!this.selectedDeliverable) return;
+  
+  const form = document.getElementById('edit-deliverable-form');
+  
+  // Basic validation
+  if (!form.title.value || !form.startDate.value || !form.endDate.value) {
+    alert('Please fill out all required fields');
+    return;
+  }
+  
+  // Find the deliverable in the array
+  const index = this.deliverables.findIndex(d => d.id === this.selectedDeliverable.id);
+  if (index === -1) return;
+  
+  // Update the deliverable
+  const updatedDeliverable = {
+    ...this.selectedDeliverable,
+    title: form.title.value,
+    description: form.description.value,
+    startDate: this.parseDate(form.startDate.value),
+    endDate: this.parseDate(form.endDate.value),
+    status: form.status.value,
+    assignee: form.assignee.value,
+    priority: form.priority.value,
+    category: form.category.value
+  };
+  
+  // Add program increment and work type if they exist in the form
+  if (form.programIncrement) {
+    updatedDeliverable.programIncrement = form.programIncrement.value;
+  }
+  if (form.workType) {
+    updatedDeliverable.workType = form.workType.value;
+  }
+  
+  // Update the deliverable in the array
+  this.deliverables[index] = updatedDeliverable;
+  
+  // Save to storage
+  this.saveToStorage();
+  
+  // Close modal and refresh view
+  this.closeAllModals();
+  this.renderCurrentView();
+}
+    
+    
+    // Delete deliverable
+    deleteDeliverable(id) {
+      // Ask for confirmation
+      if (!confirm('Are you sure you want to delete this deliverable? This action cannot be undone.')) {
+        return;
+      }
+      
+      // Remove from array
+      this.deliverables = this.deliverables.filter(d => d.id !== id);
+      
+      // Save to storage
+      this.saveToStorage();
+      
+      // Close modal and refresh view
+      this.closeAllModals();
+      this.renderCurrentView();
+    }
+    
+    // Change deliverable status (kept for backward compatibility)
+    changeDeliverableStatus(id, newStatus) {
+      const index = this.deliverables.findIndex(d => d.id === id);
+      if (index !== -1) {
+        this.deliverables[index].status = newStatus;
         
         // Save to storage
         this.saveToStorage();
         
-        // Close modal and refresh view
-        this.closeAllModals();
+        // Refresh view
         this.renderCurrentView();
-      }
-      
-      // Change deliverable status
-      changeDeliverableStatus(id, newStatus) {
-        const index = this.deliverables.findIndex(d => d.id === id);
-        if (index !== -1) {
-          this.deliverables[index].status = newStatus;
-          
-          // Save to storage
-          this.saveToStorage();
-          
-          // Refresh view
-          this.renderCurrentView();
-        }
-      }
-      
-      // Sort deliverables by start date
-      getSortedDeliverables() {
-        return [...this.deliverables].sort((a, b) => a.startDate - b.startDate);
-      }
-      
-      // Render Timeline View
-      renderTimelineView() {
-        const container = document.getElementById('timeline-container');
-        container.innerHTML = '';
-        
-        // Get sorted deliverables
-        const sortedDeliverables = this.getSortedDeliverables();
-        
-        if (sortedDeliverables.length === 0) {
-          const emptyMessage = document.createElement('div');
-          emptyMessage.className = 'empty-message';
-          emptyMessage.textContent = 'No deliverables yet. Add your first deliverable to get started.';
-          emptyMessage.style.textAlign = 'center';
-          emptyMessage.style.padding = '2rem';
-          emptyMessage.style.color = '#666';
-          container.appendChild(emptyMessage);
-          return;
-        }
-        
-        // Create cards for each deliverable
-        sortedDeliverables.forEach(deliverable => {
-          const card = document.createElement('div');
-          card.className = 'deliverable-card';
-          card.onclick = () => this.showDetailModal(deliverable);
-          
-          // Determine status color
-          let statusClass = 'status-to-do';
-          if (deliverable.status === 'Completed') statusClass = 'status-completed';
-          else if (deliverable.status === 'In Progress') statusClass = 'status-in-progress';
-          
-          card.innerHTML = `
-            <div class="deliverable-header">
-              <h3 class="deliverable-title">${deliverable.title}</h3>
-              <span class="status-tag ${statusClass}">${deliverable.status}</span>
-            </div>
-            <p class="deliverable-description">${deliverable.description || ''}</p>
-            <div class="deliverable-dates">
-              ${deliverable.startDate.toLocaleDateString()} to ${deliverable.endDate.toLocaleDateString()}
-            </div>
-            <div>
-              ${deliverable.assignee ? `<span class="tag tag-assignee">${deliverable.assignee}</span>` : ''}
-              ${deliverable.priority ? `<span class="tag tag-priority">${deliverable.priority}</span>` : ''}
-              ${deliverable.category ? `<span class="tag tag-category">${deliverable.category}</span>` : ''}
-            </div>
-          `;
-          
-          container.appendChild(card);
-        });
-      }
-      
-      // Render Calendar View
-      renderCalendarView() {
-        // Update month title
-        const monthName = this.currentMonth.toLocaleString('default', { month: 'long' });
-        const year = this.currentMonth.getFullYear();
-        document.getElementById('calendar-month-title').textContent = `${monthName} ${year}`;
-        
-        // Create calendar grid
-        const grid = document.getElementById('calendar-grid');
-        grid.innerHTML = '';
-        
-        // Add day headers
-        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        dayNames.forEach(day => {
-          const dayHeader = document.createElement('div');
-          dayHeader.className = 'calendar-day-header';
-          dayHeader.textContent = day;
-          grid.appendChild(dayHeader);
-        });
-        
-        // Get first day of month and number of days
-        const firstDay = new Date(year, this.currentMonth.getMonth(), 1).getDay();
-        const daysInMonth = new Date(year, this.currentMonth.getMonth() + 1, 0).getDate();
-        
-        // Add empty cells for days before start of month
-        for (let i = 0; i < firstDay; i++) {
-          const emptyCell = document.createElement('div');
-          emptyCell.className = 'calendar-day';
-          emptyCell.style.backgroundColor = '#f9fafb';
-          grid.appendChild(emptyCell);
-        }
-        
-        // Add days of the month
-        for (let day = 1; day <= daysInMonth; day++) {
-          const date = new Date(year, this.currentMonth.getMonth(), day);
-          
-          const dayCell = document.createElement('div');
-          dayCell.className = 'calendar-day';
-          
-          // Add day number
-          const dayNumber = document.createElement('div');
-          dayNumber.className = 'calendar-day-number';
-          dayNumber.textContent = day;
-          dayCell.appendChild(dayNumber);
-          
-          // Find deliverables for this day
-          this.deliverables.forEach(deliverable => {
-            const startDate = new Date(deliverable.startDate);
-            const endDate = new Date(deliverable.endDate);
-            
-            // Set time to 00:00:00 for start date and 23:59:59 for end date for comparison
-            startDate.setHours(0, 0, 0, 0);
-            endDate.setHours(23, 59, 59, 999);
-            
-            // Check if current date falls within the deliverable date range
-            if (date >= startDate && date <= endDate) {
-              const event = document.createElement('div');
-              
-              // Status-based class
-              let statusClass = 'calendar-event-to-do';
-              if (deliverable.status === 'Completed') statusClass = 'calendar-event-completed';
-              else if (deliverable.status === 'In Progress') statusClass = 'calendar-event-in-progress';
-              
-              event.className = `calendar-event ${statusClass}`;
-              event.textContent = deliverable.title;
-              event.onclick = (e) => {
-                e.stopPropagation(); // Prevent the cell's click handler
-                this.showDetailModal(deliverable);
-              };
-              
-              dayCell.appendChild(event);
-            }
-          });
-          
-          grid.appendChild(dayCell);
-        }
-      }
-      
-      // Render Kanban View
-      renderKanbanView() {
-        // Clear existing cards
-        document.getElementById('kanban-todo').innerHTML = '';
-        document.getElementById('kanban-in-progress').innerHTML = '';
-        document.getElementById('kanban-completed').innerHTML = '';
-        
-        // Check if we have no deliverables
-        if (this.deliverables.length === 0) {
-          const emptyMessage = document.createElement('div');
-          emptyMessage.textContent = 'No deliverables yet. Add your first deliverable to get started.';
-          emptyMessage.style.textAlign = 'center';
-          emptyMessage.style.padding = '1rem';
-          emptyMessage.style.color = '#666';
-          document.getElementById('kanban-todo').appendChild(emptyMessage);
-          return;
-        }
-        
-        // Group deliverables by status
-        this.deliverables.forEach(deliverable => {
-          const card = document.createElement('div');
-          card.className = 'kanban-card';
-          card.onclick = () => this.showDetailModal(deliverable);
-          
-          card.innerHTML = `
-            <h3 class="kanban-card-title">${deliverable.title}</h3>
-            <p class="kanban-card-description">${deliverable.description || ''}</p>
-            <div class="deliverable-dates">
-              ${deliverable.startDate.toLocaleDateString()} - ${deliverable.endDate.toLocaleDateString()}
-            </div>
-            <div>
-              ${deliverable.assignee ? `<span class="tag tag-assignee">${deliverable.assignee}</span>` : ''}
-              ${deliverable.priority ? `<span class="tag tag-priority">${deliverable.priority}</span>` : ''}
-            </div>
-          `;
-          
-          // Add to appropriate column
-          let container;
-          if (deliverable.status === 'To Do') {
-            container = document.getElementById('kanban-todo');
-          } else if (deliverable.status === 'In Progress') {
-            container = document.getElementById('kanban-in-progress');
-          } else if (deliverable.status === 'Completed') {
-            container = document.getElementById('kanban-completed');
-          }
-          
-          if (container) {
-            container.appendChild(card);
-          }
-        });
-      }
-      
-      // Navigate to previous/next month
-      navigateMonth(direction) {
-        this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + direction, 1);
-        this.renderCalendarView();
       }
     }
     
-    // Initialize the application
-    document.addEventListener('DOMContentLoaded', () => {
-      window.app = new KanbanTimelinePlanner();
-    });
-  </script>
+    // Sort deliverables by start date
+    getSortedDeliverables() {
+      return [...this.deliverables].sort((a, b) => a.startDate - b.startDate);
+    }
+    
+    // Render Timeline View
+    renderTimelineView() {
+      const container = document.getElementById('timeline-container');
+      container.innerHTML = '';
+      
+      // Get sorted deliverables
+      const sortedDeliverables = this.getSortedDeliverables();
+      
+      if (sortedDeliverables.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className = 'empty-message';
+        emptyMessage.textContent = 'No deliverables yet. Add your first deliverable to get started.';
+        emptyMessage.style.textAlign = 'center';
+        emptyMessage.style.padding = '2rem';
+        emptyMessage.style.color = '#666';
+        container.appendChild(emptyMessage);
+        return;
+      }
+      
+      // Create cards for each deliverable
+      sortedDeliverables.forEach(deliverable => {
+        const card = document.createElement('div');
+        card.className = 'deliverable-card';
+        card.onclick = () => this.showDetailModal(deliverable);
+        
+        // Determine status color
+        let statusClass = 'status-to-do';
+        if (deliverable.status === 'Completed') statusClass = 'status-completed';
+        else if (deliverable.status === 'In Progress') statusClass = 'status-in-progress';
+        
+        card.innerHTML = `
+          <div class="deliverable-header">
+            <h3 class="deliverable-title">${deliverable.title}</h3>
+            <span class="status-tag ${statusClass}">${deliverable.status}</span>
+          </div>
+          <p class="deliverable-description">${deliverable.description || ''}</p>
+          <div class="deliverable-dates">
+            ${deliverable.startDate.toLocaleDateString()} to ${deliverable.endDate.toLocaleDateString()}
+          </div>
+          <div>
+            ${deliverable.assignee ? `<span class="tag tag-assignee">${deliverable.assignee}</span>` : ''}
+            ${deliverable.priority ? `<span class="tag tag-priority">${deliverable.priority}</span>` : ''}
+            ${deliverable.category ? `<span class="tag tag-category">${deliverable.category}</span>` : ''}
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+    }
+    
+    // Render Kanban View
+    renderKanbanView() {
+      // Clear existing cards
+      document.getElementById('kanban-todo').innerHTML = '';
+      document.getElementById('kanban-in-progress').innerHTML = '';
+      document.getElementById('kanban-completed').innerHTML = '';
+      
+      // Check if we have no deliverables
+      if (this.deliverables.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.textContent = 'No deliverables yet. Add your first deliverable to get started.';
+        emptyMessage.style.textAlign = 'center';
+        emptyMessage.style.padding = '1rem';
+        emptyMessage.style.color = '#666';
+        document.getElementById('kanban-todo').appendChild(emptyMessage);
+        return;
+      }
+      
+      // Group deliverables by status
+      this.deliverables.forEach(deliverable => {
+        const card = document.createElement('div');
+        card.className = 'kanban-card';
+        card.onclick = () => this.showDetailModal(deliverable);
+        
+        card.innerHTML = `
+          <h3 class="kanban-card-title">${deliverable.title}</h3>
+          <p class="kanban-card-description">${deliverable.description || ''}</p>
+          <div class="deliverable-dates">
+            ${deliverable.startDate.toLocaleDateString()} - ${deliverable.endDate.toLocaleDateString()}
+          </div>
+          <div>
+            ${deliverable.assignee ? `<span class="tag tag-assignee">${deliverable.assignee}</span>` : ''}
+            ${deliverable.priority ? `<span class="tag tag-priority">${deliverable.priority}</span>` : ''}
+          </div>
+        `;
+        
+        // Add to appropriate column
+        let container;
+        if (deliverable.status === 'To Do') {
+          container = document.getElementById('kanban-todo');
+        } else if (deliverable.status === 'In Progress') {
+          container = document.getElementById('kanban-in-progress');
+        } else if (deliverable.status === 'Completed') {
+          container = document.getElementById('kanban-completed');
+        }
+        
+        if (container) {
+          container.appendChild(card);
+        }
+      });
+    }
+  }
+  
+  // Initialize the application
+  document.addEventListener('DOMContentLoaded', () => {
+    window.app = new KanbanTimelinePlanner();
+  });
+</script>
 </body>
 </html>
