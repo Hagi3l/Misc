@@ -73,7 +73,7 @@
     position: relative;
   }
   
-        .gantt-row {
+  .gantt-row {
     display: flex;
     height: 40px;
     border-bottom: 1px solid #f3f4f6;
@@ -172,6 +172,39 @@
   .year-display {
     font-weight: 600;
     font-size: 1.25rem;
+  }
+  
+  /* Pillar styles */
+  .gantt-pillar-header {
+    background-color: #f3f4f6;
+    padding: 0.5rem;
+    font-weight: 600;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .gantt-pillar-section {
+    margin-bottom: 1rem;
+  }
+  
+  /* Pillar colors */
+  .pillar-access {
+    border-left: 4px solid #3b82f6;
+  }
+  
+  .pillar-threat {
+    border-left: 4px solid #ef4444;
+  }
+  
+  .pillar-infrastructure {
+    border-left: 4px solid #10b981;
+  }
+  
+  .pillar-data {
+    border-left: 4px solid #8b5cf6;
+  }
+  
+  .pillar-rapid {
+    border-left: 4px solid #f59e0b;
   }
     
   /* Reset and base styles */
@@ -586,6 +619,7 @@
     justify-content: center;
     padding: 1rem;
     z-index: 50;
+    overflow-y: auto;
   }
 
   .modal {
@@ -595,6 +629,9 @@
     padding: 1.5rem;
     width: 100%;
     max-width: 32rem;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
   }
 
   .modal-large {
@@ -622,12 +659,16 @@
 
   .modal-content {
     margin-bottom: 1.5rem;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    max-height: calc(85vh - 9rem); /* Subtract header and footer heights */
   }
 
   .modal-footer {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
+    margin-top: auto;
   }
 
   /* Form styles */
@@ -654,12 +695,28 @@
   textarea {
     resize: vertical;
     min-height: 5rem;
+    max-height: 15rem;
   }
 
   .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
+  }
+
+  /* Responsive adjustments for small screens */
+  @media (max-width: 640px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+    
+    .modal {
+      max-height: 95vh;
+    }
+    
+    .modal-content {
+      max-height: calc(95vh - 9rem);
+    }
   }
 
   /* Hide file input */
@@ -710,6 +767,37 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+  }
+
+  /* Pillar tag styles */
+  .tag-pillar {
+    background-color: #e5e7eb;
+    color: #374151;
+  }
+  
+  .tag-pillar-access {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+  
+  .tag-pillar-threat {
+    background-color: #fee2e2;
+    color: #b91c1c;
+  }
+  
+  .tag-pillar-infrastructure {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  
+  .tag-pillar-data {
+    background-color: #ede9fe;
+    color: #5b21b6;
+  }
+  
+  .tag-pillar-rapid {
+    background-color: #fef3c7;
+    color: #92400e;
   }
 </style>
 </head>
@@ -811,21 +899,6 @@
           <h3 class="kanban-column-header">To Do</h3>
           <div id="kanban-todo" class="kanban-column-content">
             <!-- Cards will be added here dynamically -->
-          <div class="form-row">
-            <div class="form-group">
-              <label for="program-increment">Program Increment (PI)</label>
-              <select id="program-increment" name="programIncrement">
-                <option value="">None</option>
-                <option value="PI44">PI44 (30/04/2025 - 22/07/2025)</option>
-                <option value="PI45">PI45 (23/07/2025 - 14/10/2025)</option>
-                <option value="PI46">PI46 (15/10/2025 - 13/01/2026)</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="work-type">Work Type</label>
-              <input type="text" id="work-type" name="workType" placeholder="Feature, Bug, Tech Debt, etc.">
-            </div>
           </div>
         </div>
         
@@ -846,15 +919,18 @@
     </div>
   </main>
   
- <!-- Add Deliverable Modal - Fixed structure -->
+   <!-- Add Deliverable Modal - Fixed structure -->
 <div id="add-modal" class="modal-backdrop hidden">
-    <div class="modal">
+    <div class="modal modal-large">
       <div class="modal-header">
         <h2 class="modal-title">Add New Deliverable</h2>
         <button class="modal-close" data-close-modal>&times;</button>
       </div>
       <div class="modal-content">
         <form id="add-deliverable-form">
+          <!-- Basic info section -->
+          <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; color: #3b82f6;">Basic Information</h3>
+          
           <div class="form-group">
             <label for="title">Title *</label>
             <input type="text" id="title" name="title" required>
@@ -878,8 +954,15 @@
           </div>
           
           <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" name="description"></textarea>
+            <label for="security-pillar">Security Pillar</label>
+            <select id="security-pillar" name="securityPillar">
+              <option value="">None</option>
+              <option value="Access & Identity Governance">Access & Identity Governance</option>
+              <option value="Threat Detection & Monitoring">Threat Detection & Monitoring</option>
+              <option value="Infrastructure Resilience">Infrastructure Resilience</option>
+              <option value="Data Security & Compliance">Data Security & Compliance</option>
+              <option value="Rapid Response & Automation">Rapid Response & Automation</option>
+            </select>
           </div>
           
           <div class="form-row">
@@ -914,14 +997,59 @@
             </div>
           </div>
           
-          <div class="form-group">
-            <label for="assignee">Assignee</label>
-            <input type="text" id="assignee" name="assignee">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="assignee">Assignee</label>
+              <input type="text" id="assignee" name="assignee">
+            </div>
+            
+            <div class="form-group">
+              <label for="category">Category</label>
+              <input type="text" id="category" name="category">
+            </div>
           </div>
           
           <div class="form-group">
-            <label for="category">Category</label>
-            <input type="text" id="category" name="category">
+            <label for="description">Description</label>
+            <textarea id="description" name="description"></textarea>
+          </div>
+          
+          <!-- Additional detailed fields -->
+          <h3 style="margin-top: 1.5rem; margin-bottom: 1rem; font-size: 1.1rem; color: #3b82f6;">Additional Details</h3>
+          
+          <div class="form-group">
+            <label for="scope">Scope</label>
+            <textarea id="scope" name="scope" placeholder="Define the boundaries and scope of this deliverable"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="dependencies">Dependencies</label>
+            <textarea id="dependencies" name="dependencies" placeholder="List any dependencies or prerequisite tasks"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="risks">Risks</label>
+            <textarea id="risks" name="risks" placeholder="Identify potential risks and mitigation strategies"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="business-value">Business Value</label>
+            <textarea id="business-value" name="businessValue" placeholder="Describe the value this deliverable brings to the business"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="business-problem">Business Problem</label>
+            <textarea id="business-problem" name="businessProblem" placeholder="What business problem does this deliverable address?"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="benefits">Benefits</label>
+            <textarea id="benefits" name="benefits" placeholder="List the benefits and outcomes of completing this deliverable"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="user-story">User Story</label>
+            <textarea id="user-story" name="userStory" placeholder="As a [type of user], I want [goal] so that [benefit]"></textarea>
           </div>
         </form>
       </div>
@@ -941,6 +1069,9 @@
       </div>
       <div class="modal-content">
         <form id="edit-deliverable-form">
+          <!-- Basic info section -->
+          <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.1rem; color: #3b82f6;">Basic Information</h3>
+          
           <div class="form-group">
             <label for="detail-title-edit">Title</label>
             <input type="text" id="detail-title-edit" name="title" required>
@@ -964,8 +1095,15 @@
           </div>
           
           <div class="form-group">
-            <label for="detail-description-edit">Description</label>
-            <textarea id="detail-description-edit" name="description"></textarea>
+            <label for="detail-security-pillar-edit">Security Pillar</label>
+            <select id="detail-security-pillar-edit" name="securityPillar">
+              <option value="">None</option>
+              <option value="Access & Identity Governance">Access & Identity Governance</option>
+              <option value="Threat Detection & Monitoring">Threat Detection & Monitoring</option>
+              <option value="Infrastructure Resilience">Infrastructure Resilience</option>
+              <option value="Data Security & Compliance">Data Security & Compliance</option>
+              <option value="Rapid Response & Automation">Rapid Response & Automation</option>
+            </select>
           </div>
           
           <div class="form-row">
@@ -1011,6 +1149,49 @@
               <input type="text" id="detail-category-edit" name="category">
             </div>
           </div>
+          
+          <div class="form-group">
+            <label for="detail-description-edit">Description</label>
+            <textarea id="detail-description-edit" name="description"></textarea>
+          </div>
+          
+          <!-- Additional detailed fields -->
+          <h3 style="margin-top: 1.5rem; margin-bottom: 1rem; font-size: 1.1rem; color: #3b82f6;">Additional Details</h3>
+          
+          <div class="form-group">
+            <label for="detail-scope-edit">Scope</label>
+            <textarea id="detail-scope-edit" name="scope" placeholder="Define the boundaries and scope of this deliverable"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="detail-dependencies-edit">Dependencies</label>
+            <textarea id="detail-dependencies-edit" name="dependencies" placeholder="List any dependencies or prerequisite tasks"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="detail-risks-edit">Risks</label>
+            <textarea id="detail-risks-edit" name="risks" placeholder="Identify potential risks and mitigation strategies"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="detail-business-value-edit">Business Value</label>
+            <textarea id="detail-business-value-edit" name="businessValue" placeholder="Describe the value this deliverable brings to the business"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="detail-business-problem-edit">Business Problem</label>
+            <textarea id="detail-business-problem-edit" name="businessProblem" placeholder="What business problem does this deliverable address?"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="detail-benefits-edit">Benefits</label>
+            <textarea id="detail-benefits-edit" name="benefits" placeholder="List the benefits and outcomes of completing this deliverable"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="detail-user-story-edit">User Story</label>
+            <textarea id="detail-user-story-edit" name="userStory" placeholder="As a [type of user], I want [goal] so that [benefit]"></textarea>
+          </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -1043,6 +1224,7 @@
       this.selectedDeliverable = null;
       this.fileUploaded = false;
       this.storage = this.detectStorage();
+      this.formModified = false;
       
       // Program Increment date ranges
       this.programIncrements = {
@@ -1061,6 +1243,33 @@
           end: new Date('2026-01-13'),
           color: 'rgba(16, 185, 129, 0.15)' // green with transparency
         }
+      };
+      
+      // Security Pillars
+      this.securityPillars = [
+        'Access & Identity Governance',
+        'Threat Detection & Monitoring',
+        'Infrastructure Resilience',
+        'Data Security & Compliance',
+        'Rapid Response & Automation'
+      ];
+      
+      // Pillar CSS classes
+      this.pillarClasses = {
+        'Access & Identity Governance': 'pillar-access',
+        'Threat Detection & Monitoring': 'pillar-threat',
+        'Infrastructure Resilience': 'pillar-infrastructure',
+        'Data Security & Compliance': 'pillar-data',
+        'Rapid Response & Automation': 'pillar-rapid'
+      };
+      
+      // Pillar tag CSS classes
+      this.pillarTagClasses = {
+        'Access & Identity Governance': 'tag-pillar-access',
+        'Threat Detection & Monitoring': 'tag-pillar-threat',
+        'Infrastructure Resilience': 'tag-pillar-infrastructure',
+        'Data Security & Compliance': 'tag-pillar-data',
+        'Rapid Response & Automation': 'tag-pillar-rapid'
       };
       
       // Initialize the application
@@ -1232,13 +1441,35 @@
         return !(endDate < yearStart || startDate > yearEnd);
       });
       
-      // Sort deliverables by start date and then title
-      const sortedDeliverables = [...relevantDeliverables].sort((a, b) => {
-        const dateCompare = new Date(a.startDate) - new Date(b.startDate);
-        return dateCompare !== 0 ? dateCompare : a.title.localeCompare(b.title);
+      // Group deliverables by pillar
+      const deliverablesByPillar = {};
+      
+      // Initialize with all pillars so they appear even if empty
+      this.securityPillars.forEach(pillar => {
+        deliverablesByPillar[pillar] = [];
       });
       
-      if (sortedDeliverables.length === 0 && Object.keys(this.programIncrements).length === 0) {
+      // Add "No Pillar" group
+      deliverablesByPillar[''] = [];
+      
+      // Populate pillar groups
+      relevantDeliverables.forEach(d => {
+        const pillar = d.securityPillar || '';
+        if (!deliverablesByPillar[pillar]) {
+          deliverablesByPillar[pillar] = [];
+        }
+        deliverablesByPillar[pillar].push(d);
+      });
+      
+      // Sort within each pillar by start date and then title
+      Object.keys(deliverablesByPillar).forEach(pillar => {
+        deliverablesByPillar[pillar].sort((a, b) => {
+          const dateCompare = new Date(a.startDate) - new Date(b.startDate);
+          return dateCompare !== 0 ? dateCompare : a.title.localeCompare(b.title);
+        });
+      });
+      
+      if (relevantDeliverables.length === 0 && Object.keys(this.programIncrements).length === 0) {
         const emptyMessage = document.createElement('div');
         emptyMessage.textContent = 'No deliverables for this year. Add deliverables or change the year.';
         emptyMessage.style.padding = '2rem';
@@ -1331,93 +1562,135 @@
         timeline.appendChild(piHighlight);
       });
       
-      // For each task, create a row
-      sortedDeliverables.forEach(deliverable => {
-        // Create the task info section in the sidebar
-        const taskInfoRow = document.createElement('div');
-        taskInfoRow.className = 'gantt-row';
+      // Process each pillar and its deliverables
+      const pillarsToDisplay = [...this.securityPillars];
+      
+      // Add "No Pillar" at the end if it has any deliverables
+      if (deliverablesByPillar[''] && deliverablesByPillar[''].length > 0) {
+        pillarsToDisplay.push('');
+      }
+      
+      pillarsToDisplay.forEach(pillar => {
+        const pillarDeliverables = deliverablesByPillar[pillar] || [];
         
-        const taskInfo = document.createElement('div');
-        taskInfo.className = 'gantt-task-info';
+        // Skip empty pillars
+        if (pillarDeliverables.length === 0) return;
         
-        // Display title with PI and Work Type if available
-        let taskTitle = deliverable.title;
-        if (deliverable.programIncrement) {
-          taskTitle = `[${deliverable.programIncrement}] ${taskTitle}`;
-        }
-        if (deliverable.workType) {
-          taskTitle = `${taskTitle} (${deliverable.workType})`;
-        }
+        // Create pillar header
+        const pillarHeaderRow = document.createElement('div');
+        pillarHeaderRow.className = 'gantt-row';
         
-        taskInfo.textContent = taskTitle;
-        taskInfo.title = taskTitle;
-        taskInfoRow.appendChild(taskInfo);
+        const pillarHeader = document.createElement('div');
+        pillarHeader.className = `gantt-pillar-header ${this.pillarClasses[pillar] || ''}`;
+        pillarHeader.textContent = pillar || 'No Pillar';
+        pillarHeaderRow.appendChild(pillarHeader);
         
-        sidebar.appendChild(taskInfoRow);
+        sidebar.appendChild(pillarHeaderRow);
         
-        // Create the timeline cells for this task
-        const timelineRow = document.createElement('div');
-        timelineRow.className = 'gantt-row';
+        // Add empty row in timeline for the header
+        const pillarHeaderTimelineRow = document.createElement('div');
+        pillarHeaderTimelineRow.className = 'gantt-row';
         
-        // Calculate task bar position
-        const startDate = new Date(deliverable.startDate);
-        const endDate = new Date(deliverable.endDate);
-        
-        // Make sure dates are clamped to the current year if they extend beyond
-        const visibleStartDate = new Date(Math.max(startDate.getTime(), yearStart.getTime()));
-        const visibleEndDate = new Date(Math.min(endDate.getTime(), yearEnd.getTime()));
-        
-        // Calculate the percentage of the year for positioning
-        const yearMs = yearEnd.getTime() - yearStart.getTime();
-        const startOffset = (visibleStartDate.getTime() - yearStart.getTime()) / yearMs;
-        const duration = (visibleEndDate.getTime() - visibleStartDate.getTime()) / yearMs;
-        
-        // Add cells for each month
+        // Add empty cells for each month in the header row
         for (let i = 0; i < 12; i++) {
           const cell = document.createElement('div');
           cell.className = 'gantt-task-cell';
-          timelineRow.appendChild(cell);
+          pillarHeaderTimelineRow.appendChild(cell);
         }
         
-        // Create task bar element
-        const taskBar = document.createElement('div');
+        timeline.appendChild(pillarHeaderTimelineRow);
         
-        // Determine status-based class
-        let statusClass = 'gantt-bar-to-do';
-        if (deliverable.status === 'Completed') statusClass = 'gantt-bar-completed';
-        else if (deliverable.status === 'In Progress') statusClass = 'gantt-bar-in-progress';
-        
-        taskBar.className = `gantt-task-bar ${statusClass}`;
-        
-        // Position the task bar absolutely within the task cell
-        taskBar.style.position = 'absolute';
-        taskBar.style.left = `${startOffset * 100}%`;
-        taskBar.style.width = `${Math.max(duration * 100, 0.5)}%`;
-        
-        // Task bar text and hover details
-        let tooltipText = `${deliverable.title} (${this.formatDateAU(startDate)} - ${this.formatDateAU(endDate)})`;
-        if (deliverable.programIncrement) {
-          tooltipText += ` | ${deliverable.programIncrement}`;
-        }
-        if (deliverable.workType) {
-          tooltipText += ` | ${deliverable.workType}`;
-        }
-        taskBar.title = tooltipText;
-        
-        // Only add text if bar is wide enough
-        if (duration > 0.05) {
-          taskBar.textContent = deliverable.title;
-        }
-        
-        // Add click handler
-        taskBar.onclick = (e) => {
-          e.stopPropagation(); // Prevent row click from triggering
-          this.showDetailModal(deliverable);
-        };
-        
-        // Add task bar to the timeline row first, then add row to timeline
-        timelineRow.appendChild(taskBar);
-        timeline.appendChild(timelineRow);
+        // Add tasks for this pillar
+        pillarDeliverables.forEach(deliverable => {
+          // Create the task info section in the sidebar
+          const taskInfoRow = document.createElement('div');
+          taskInfoRow.className = 'gantt-row';
+          
+          const taskInfo = document.createElement('div');
+          taskInfo.className = 'gantt-task-info';
+          
+          // Display title with PI and Work Type if available
+          let taskTitle = deliverable.title;
+          if (deliverable.programIncrement) {
+            taskTitle = `[${deliverable.programIncrement}] ${taskTitle}`;
+          }
+          if (deliverable.workType) {
+            taskTitle = `${taskTitle} (${deliverable.workType})`;
+          }
+          
+          taskInfo.textContent = taskTitle;
+          taskInfo.title = taskTitle;
+          taskInfoRow.appendChild(taskInfo);
+          
+          sidebar.appendChild(taskInfoRow);
+          
+          // Create the timeline cells for this task
+          const timelineRow = document.createElement('div');
+          timelineRow.className = 'gantt-row';
+          
+          // Calculate task bar position
+          const startDate = new Date(deliverable.startDate);
+          const endDate = new Date(deliverable.endDate);
+          
+          // Make sure dates are clamped to the current year if they extend beyond
+          const visibleStartDate = new Date(Math.max(startDate.getTime(), yearStart.getTime()));
+          const visibleEndDate = new Date(Math.min(endDate.getTime(), yearEnd.getTime()));
+          
+          // Calculate the percentage of the year for positioning
+          const yearMs = yearEnd.getTime() - yearStart.getTime();
+          const startOffset = (visibleStartDate.getTime() - yearStart.getTime()) / yearMs;
+          const duration = (visibleEndDate.getTime() - visibleStartDate.getTime()) / yearMs;
+          
+          // Add cells for each month
+          for (let i = 0; i < 12; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'gantt-task-cell';
+            timelineRow.appendChild(cell);
+          }
+          
+          // Create task bar element
+          const taskBar = document.createElement('div');
+          
+          // Determine status-based class
+          let statusClass = 'gantt-bar-to-do';
+          if (deliverable.status === 'Completed') statusClass = 'gantt-bar-completed';
+          else if (deliverable.status === 'In Progress') statusClass = 'gantt-bar-in-progress';
+          
+          taskBar.className = `gantt-task-bar ${statusClass}`;
+          
+          // Position the task bar absolutely within the task cell
+          taskBar.style.position = 'absolute';
+          taskBar.style.left = `${startOffset * 100}%`;
+          taskBar.style.width = `${Math.max(duration * 100, 0.5)}%`;
+          
+          // Task bar text and hover details
+          let tooltipText = `${deliverable.title} (${this.formatDateAU(startDate)} - ${this.formatDateAU(endDate)})`;
+          if (deliverable.programIncrement) {
+            tooltipText += ` | ${deliverable.programIncrement}`;
+          }
+          if (deliverable.workType) {
+            tooltipText += ` | ${deliverable.workType}`;
+          }
+          if (deliverable.securityPillar) {
+            tooltipText += ` | ${deliverable.securityPillar}`;
+          }
+          taskBar.title = tooltipText;
+          
+          // Only add text if bar is wide enough
+          if (duration > 0.05) {
+            taskBar.textContent = deliverable.title;
+          }
+          
+          // Add click handler
+          taskBar.onclick = (e) => {
+            e.stopPropagation(); // Prevent row click from triggering
+            this.showDetailModal(deliverable);
+          };
+          
+          // Add task bar to the timeline row first, then add row to timeline
+          timelineRow.appendChild(taskBar);
+          timeline.appendChild(timelineRow);
+        });
       });
       
       // Add today marker if current year
@@ -1552,7 +1825,10 @@
               status: item.status || 'To Do',
               assignee: item.assignee || '',
               priority: item.priority || 'Medium',
-              category: item.category || ''
+              category: item.category || '',
+              securityPillar: item.securityPillar || '',
+              programIncrement: item.programIncrement || '',
+              workType: item.workType || ''
             };
           });
           
@@ -1678,7 +1954,7 @@
       // Create ordered header array with title first
       const headers = Array.from(allKeys);
       // Move important fields to the front
-      const priorityFields = ['title', 'description', 'startDate', 'endDate', 'status', 'assignee', 'priority', 'category'];
+      const priorityFields = ['title', 'description', 'securityPillar', 'startDate', 'endDate', 'status', 'assignee', 'priority', 'category', 'programIncrement', 'workType'];
       
       priorityFields.forEach(field => {
         if (headers.includes(field)) {
@@ -1747,7 +2023,17 @@
           status: 'Completed',
           assignee: 'John Doe',
           priority: 'High',
-          category: 'Meeting'
+          category: 'Meeting',
+          securityPillar: 'Access & Identity Governance',
+          programIncrement: 'PI44',
+          workType: 'Meeting',
+          scope: 'Define project scope and initial requirements for the identity governance workstream',
+          dependencies: 'Security policy approval, budget allocation',
+          risks: 'Resource availability, timeline constraints',
+          businessValue: 'Enhanced security posture and regulatory compliance',
+          businessProblem: 'Current identity management processes are manual and error-prone',
+          benefits: 'Streamlined access provisioning, reduced audit findings, improved user experience',
+          userStory: 'As a security administrator, I want automated identity governance workflows so that I can reduce manual errors and increase efficiency'
         },
         {
           id: 'task-2',
@@ -1758,40 +2044,66 @@
           status: 'In Progress',
           assignee: 'Jane Smith',
           priority: 'High',
-          category: 'Analysis'
+          category: 'Analysis',
+          securityPillar: 'Access & Identity Governance',
+          programIncrement: 'PI44',
+          workType: 'Analysis'
         },
         {
           id: 'task-3',
-          title: 'UI Design',
-          description: 'Create wireframes and mockups',
+          title: 'Threat Model Design',
+          description: 'Create threat modeling documentation',
           startDate: new Date('2025-03-21'),
           endDate: new Date('2025-03-28'),
           status: 'To Do',
           assignee: 'Michael Johnson',
           priority: 'Medium',
-          category: 'Design'
+          category: 'Design',
+          securityPillar: 'Threat Detection & Monitoring',
+          programIncrement: 'PI44',
+          workType: 'Design'
         },
         {
           id: 'task-4',
-          title: 'Frontend Development',
-          description: 'Implement UI components and functionality',
+          title: 'Infrastructure Testing',
+          description: 'Test resilience of infrastructure components',
           startDate: new Date('2025-03-29'),
           endDate: new Date('2025-04-10'),
           status: 'To Do',
           assignee: 'Sarah Williams',
           priority: 'Medium',
-          category: 'Development'
+          category: 'Testing',
+          securityPillar: 'Infrastructure Resilience',
+          programIncrement: 'PI44',
+          workType: 'Testing'
         },
         {
           id: 'task-5',
-          title: 'Testing & QA',
-          description: 'Test functionality and fix issues',
+          title: 'Data Security Review',
+          description: 'Review data security controls and compliance',
           startDate: new Date('2025-04-11'),
           endDate: new Date('2025-04-18'),
           status: 'To Do',
           assignee: 'David Brown',
           priority: 'High',
-          category: 'Testing'
+          category: 'Review',
+          securityPillar: 'Data Security & Compliance',
+          programIncrement: 'PI44',
+          workType: 'Review'
+        },
+        {
+          id: 'task-6',
+          title: 'Automation Framework Setup',
+          description: 'Set up automation framework for incident response',
+          startDate: new Date('2025-04-19'),
+          endDate: new Date('2025-04-30'),
+          status: 'To Do',
+          assignee: 'Emily Jones',
+          priority: 'Medium',
+          category: 'Development',
+          securityPillar: 'Rapid Response & Automation',
+          programIncrement: 'PI44',
+          workType: 'Development'
         }
       ];
       
@@ -1815,193 +2127,290 @@
     }
     
     // Show Add Deliverable modal
-showAddModal() {
-  // Reset form
-  document.getElementById('add-deliverable-form').reset();
-  
-  // Set default dates
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('start-date').value = today;
-  document.getElementById('end-date').value = today;
-  
-  // Set up event listeners for the modal
-  this.setupModalEventListeners('add-modal', () => this.addDeliverable());
-  
-  // Show modal
-  document.getElementById('add-modal').classList.remove('hidden');
-}
-
-// Show Detail view modal with editable fields
-showDetailModal(deliverable) {
-  this.selectedDeliverable = deliverable;
-  
-  // Populate modal title
-  document.getElementById('detail-title').textContent = deliverable.title;
-  
-  // Populate form fields
-  document.getElementById('detail-title-edit').value = deliverable.title;
-  document.getElementById('detail-description-edit').value = deliverable.description || '';
-  
-  // Format dates for the date inputs (YYYY-MM-DD)
-  const startDateFormatted = deliverable.startDate.toISOString().split('T')[0];
-  const endDateFormatted = deliverable.endDate.toISOString().split('T')[0];
-  
-  document.getElementById('detail-start-date-edit').value = startDateFormatted;
-  document.getElementById('detail-end-date-edit').value = endDateFormatted;
-  document.getElementById('detail-status-edit').value = deliverable.status;
-  document.getElementById('detail-priority-edit').value = deliverable.priority || 'Medium';
-  document.getElementById('detail-assignee-edit').value = deliverable.assignee || '';
-  document.getElementById('detail-category-edit').value = deliverable.category || '';
-  
-  // Handle program increment and work type if they exist
-  if (document.getElementById('detail-program-increment-edit')) {
-    document.getElementById('detail-program-increment-edit').value = deliverable.programIncrement || '';
-  }
-  if (document.getElementById('detail-work-type-edit')) {
-    document.getElementById('detail-work-type-edit').value = deliverable.workType || '';
-  }
-  
-  // Set up event listeners for the modal
-  this.setupModalEventListeners('detail-modal', () => this.saveDeliverableEdits());
-  
-  // Show modal
-  document.getElementById('detail-modal').classList.remove('hidden');
-}
-
-// Set up event listeners for modals
-setupModalEventListeners(modalId, saveFunction) {
-  const modal = document.getElementById(modalId);
-  
-  // Set up close buttons
-  const closeButtons = modal.querySelectorAll('[data-close-modal]');
-  closeButtons.forEach(button => {
-    button.onclick = () => this.closeAllModals();
-  });
-  
-  // Set up save button
-  if (modalId === 'add-modal') {
-    const saveButton = document.getElementById('save-deliverable-btn');
-    saveButton.onclick = saveFunction;
-  } else if (modalId === 'detail-modal') {
-    const saveButton = document.getElementById('save-edits-btn');
-    saveButton.onclick = saveFunction;
-    
-    // Set up delete button
-    const deleteButton = document.getElementById('delete-deliverable-btn');
-    deleteButton.onclick = () => this.deleteDeliverable(this.selectedDeliverable.id);
-    
-    // Set up export button
-    const exportButton = document.getElementById('export-csv-btn');
-    exportButton.onclick = () => this.exportToCSV();
-  }
-  
-  // Close modal when clicking outside
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      this.closeAllModals();
+    showAddModal() {
+      // Reset form and modified state
+      document.getElementById('add-deliverable-form').reset();
+      this.formModified = false;
+      
+      // Set default dates
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('start-date').value = today;
+      document.getElementById('end-date').value = today;
+      
+      // Set up event listeners for the modal
+      this.setupModalEventListeners('add-modal', () => this.addDeliverable());
+      
+      // Set up form change detection
+      this.setupFormChangeDetection('add-deliverable-form');
+      
+      // Show modal
+      document.getElementById('add-modal').classList.remove('hidden');
     }
-  });
-}
-
-// Close all modals
-closeAllModals() {
-  document.getElementById('add-modal').classList.add('hidden');
-  document.getElementById('detail-modal').classList.add('hidden');
-  
-  // Remove the selected deliverable reference
-  this.selectedDeliverable = null;
-}
-
-// Add new deliverable
-addDeliverable() {
-  const form = document.getElementById('add-deliverable-form');
-  
-  // Basic validation
-  if (!form.title.value || !form.startDate.value || !form.endDate.value) {
-    alert('Please fill out all required fields');
-    return;
-  }
-  
-  // Create new deliverable - using parseDate to support Australian date format
-  const newDeliverable = {
-    id: `task-${Date.now()}`, // Use timestamp for unique ID
-    title: form.title.value,
-    description: form.description.value,
-    startDate: this.parseDate(form.startDate.value),
-    endDate: this.parseDate(form.endDate.value),
-    status: form.status.value,
-    assignee: form.assignee.value,
-    priority: form.priority.value,
-    category: form.category.value
-  };
-  
-  // Add program increment and work type if they exist in the form
-  if (form.programIncrement) {
-    newDeliverable.programIncrement = form.programIncrement.value;
-  }
-  if (form.workType) {
-    newDeliverable.workType = form.workType.value;
-  }
-  
-  // Add to list
-  this.deliverables.push(newDeliverable);
-  
-  // Save to storage
-  this.saveToStorage();
-  
-  // Close modal and refresh view
-  this.closeAllModals();
-  this.renderCurrentView();
-}
-
-// Save edited deliverable
-saveDeliverableEdits() {
-  if (!this.selectedDeliverable) return;
-  
-  const form = document.getElementById('edit-deliverable-form');
-  
-  // Basic validation
-  if (!form.title.value || !form.startDate.value || !form.endDate.value) {
-    alert('Please fill out all required fields');
-    return;
-  }
-  
-  // Find the deliverable in the array
-  const index = this.deliverables.findIndex(d => d.id === this.selectedDeliverable.id);
-  if (index === -1) return;
-  
-  // Update the deliverable
-  const updatedDeliverable = {
-    ...this.selectedDeliverable,
-    title: form.title.value,
-    description: form.description.value,
-    startDate: this.parseDate(form.startDate.value),
-    endDate: this.parseDate(form.endDate.value),
-    status: form.status.value,
-    assignee: form.assignee.value,
-    priority: form.priority.value,
-    category: form.category.value
-  };
-  
-  // Add program increment and work type if they exist in the form
-  if (form.programIncrement) {
-    updatedDeliverable.programIncrement = form.programIncrement.value;
-  }
-  if (form.workType) {
-    updatedDeliverable.workType = form.workType.value;
-  }
-  
-  // Update the deliverable in the array
-  this.deliverables[index] = updatedDeliverable;
-  
-  // Save to storage
-  this.saveToStorage();
-  
-  // Close modal and refresh view
-  this.closeAllModals();
-  this.renderCurrentView();
-}
     
+    // Show Detail view modal with editable fields
+    showDetailModal(deliverable) {
+      this.selectedDeliverable = deliverable;
+      this.formModified = false;
+      
+      // Populate modal title
+      document.getElementById('detail-title').textContent = deliverable.title;
+      
+      // Populate form fields
+      document.getElementById('detail-title-edit').value = deliverable.title;
+      document.getElementById('detail-description-edit').value = deliverable.description || '';
+      
+      // Format dates for the date inputs (YYYY-MM-DD)
+      const startDateFormatted = deliverable.startDate.toISOString().split('T')[0];
+      const endDateFormatted = deliverable.endDate.toISOString().split('T')[0];
+      
+      document.getElementById('detail-start-date-edit').value = startDateFormatted;
+      document.getElementById('detail-end-date-edit').value = endDateFormatted;
+      document.getElementById('detail-status-edit').value = deliverable.status;
+      document.getElementById('detail-priority-edit').value = deliverable.priority || 'Medium';
+      document.getElementById('detail-assignee-edit').value = deliverable.assignee || '';
+      document.getElementById('detail-category-edit').value = deliverable.category || '';
+      
+      // Handle security pillar, program increment, and work type if they exist
+      if (document.getElementById('detail-security-pillar-edit')) {
+        document.getElementById('detail-security-pillar-edit').value = deliverable.securityPillar || '';
+      }
+      if (document.getElementById('detail-program-increment-edit')) {
+        document.getElementById('detail-program-increment-edit').value = deliverable.programIncrement || '';
+      }
+      if (document.getElementById('detail-work-type-edit')) {
+        document.getElementById('detail-work-type-edit').value = deliverable.workType || '';
+      }
+      
+      // Populate additional detailed fields
+      document.getElementById('detail-scope-edit').value = deliverable.scope || '';
+      document.getElementById('detail-dependencies-edit').value = deliverable.dependencies || '';
+      document.getElementById('detail-risks-edit').value = deliverable.risks || '';
+      document.getElementById('detail-business-value-edit').value = deliverable.businessValue || '';
+      document.getElementById('detail-business-problem-edit').value = deliverable.businessProblem || '';
+      document.getElementById('detail-benefits-edit').value = deliverable.benefits || '';
+      document.getElementById('detail-user-story-edit').value = deliverable.userStory || '';
+      
+      // Set up event listeners for the modal
+      this.setupModalEventListeners('detail-modal', () => this.saveDeliverableEdits());
+      
+      // Set up form change detection
+      this.setupFormChangeDetection('edit-deliverable-form');
+      
+      // Show modal
+      document.getElementById('detail-modal').classList.remove('hidden');
+    }
+    
+    // Set up form change detection
+    setupFormChangeDetection(formId) {
+      const form = document.getElementById(formId);
+      const formElements = form.querySelectorAll('input, textarea, select');
+      
+      formElements.forEach(element => {
+        element.addEventListener('input', () => {
+          this.formModified = true;
+        });
+        
+        element.addEventListener('change', () => {
+          this.formModified = true;
+        });
+      });
+    }
+    
+    // Set up event listeners for modals
+    setupModalEventListeners(modalId, saveFunction) {
+      const modal = document.getElementById(modalId);
+      
+      // Set up close buttons
+      const closeButtons = modal.querySelectorAll('[data-close-modal]');
+      closeButtons.forEach(button => {
+        button.onclick = () => this.closeAllModals();
+      });
+      
+      // Set up save button
+      if (modalId === 'add-modal') {
+        const saveButton = document.getElementById('save-deliverable-btn');
+        saveButton.onclick = saveFunction;
+      } else if (modalId === 'detail-modal') {
+        const saveButton = document.getElementById('save-edits-btn');
+        saveButton.onclick = saveFunction;
+        
+        // Set up delete button
+        const deleteButton = document.getElementById('delete-deliverable-btn');
+        deleteButton.onclick = () => {
+          // Reset modified flag before deleting as we're taking a deliberate action
+          this.formModified = false;
+          this.deleteDeliverable(this.selectedDeliverable.id);
+        };
+        
+        // Set up export button
+        const exportButton = document.getElementById('export-csv-btn');
+        exportButton.onclick = () => this.exportToCSV();
+      }
+      
+      // Add window event listener for beforeunload
+      window.addEventListener('beforeunload', (e) => {
+        if (this.formModified) {
+          // Standard way to show a confirmation dialog when leaving page
+          e.preventDefault();
+          e.returnValue = '';
+          return '';
+        }
+      });
+      
+      // Close modal when clicking outside
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          this.closeAllModals();
+        }
+      });
+      
+      // Handle Escape key press
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+          this.closeAllModals();
+        }
+      });
+    }
+    
+    // Close all modals
+    closeAllModals() {
+      // Check if form has been modified
+      if (this.formModified) {
+        if (!confirm('You have unsaved changes. Are you sure you want to close this form?')) {
+          return; // User canceled, don't close the modal
+        }
+      }
+      
+      // Reset form modified state
+      this.formModified = false;
+      
+      // Hide modals
+      document.getElementById('add-modal').classList.add('hidden');
+      document.getElementById('detail-modal').classList.add('hidden');
+      
+      // Remove the selected deliverable reference
+      this.selectedDeliverable = null;
+    }
+    
+    // Add new deliverable
+    addDeliverable() {
+      const form = document.getElementById('add-deliverable-form');
+      
+      // Basic validation
+      if (!form.title.value || !form.startDate.value || !form.endDate.value) {
+        alert('Please fill out all required fields');
+        return;
+      }
+      
+      // Create new deliverable - using parseDate to support Australian date format
+      const newDeliverable = {
+        id: `task-${Date.now()}`, // Use timestamp for unique ID
+        title: form.title.value,
+        description: form.description.value,
+        startDate: this.parseDate(form.startDate.value),
+        endDate: this.parseDate(form.endDate.value),
+        status: form.status.value,
+        assignee: form.assignee.value,
+        priority: form.priority.value,
+        category: form.category.value
+      };
+      
+      // Add security pillar, program increment and work type if they exist in the form
+      if (form.securityPillar) {
+        newDeliverable.securityPillar = form.securityPillar.value;
+      }
+      if (form.programIncrement) {
+        newDeliverable.programIncrement = form.programIncrement.value;
+      }
+      if (form.workType) {
+        newDeliverable.workType = form.workType.value;
+      }
+      
+      // Add the additional detailed fields
+      newDeliverable.scope = form.scope.value || '';
+      newDeliverable.dependencies = form.dependencies.value || '';
+      newDeliverable.risks = form.risks.value || '';
+      newDeliverable.businessValue = form.businessValue.value || '';
+      newDeliverable.businessProblem = form.businessProblem.value || '';
+      newDeliverable.benefits = form.benefits.value || '';
+      newDeliverable.userStory = form.userStory.value || '';
+      
+      // Add to list
+      this.deliverables.push(newDeliverable);
+      
+      // Save to storage
+      this.saveToStorage();
+      
+      // Reset modified flag
+      this.formModified = false;
+      
+      // Close modal and refresh view
+      this.closeAllModals();
+      this.renderCurrentView();
+    }
+    
+    // Save edited deliverable
+    saveDeliverableEdits() {
+      if (!this.selectedDeliverable) return;
+      
+      const form = document.getElementById('edit-deliverable-form');
+      
+      // Basic validation
+      if (!form.title.value || !form.startDate.value || !form.endDate.value) {
+        alert('Please fill out all required fields');
+        return;
+      }
+      
+      // Find the deliverable in the array
+      const index = this.deliverables.findIndex(d => d.id === this.selectedDeliverable.id);
+      if (index === -1) return;
+      
+      // Update the deliverable
+      const updatedDeliverable = {
+        ...this.selectedDeliverable,
+        title: form.title.value,
+        description: form.description.value,
+        startDate: this.parseDate(form.startDate.value),
+        endDate: this.parseDate(form.endDate.value),
+        status: form.status.value,
+        assignee: form.assignee.value,
+        priority: form.priority.value,
+        category: form.category.value
+      };
+      
+      // Add security pillar, program increment and work type if they exist in the form
+      if (form.securityPillar) {
+        updatedDeliverable.securityPillar = form.securityPillar.value;
+      }
+      if (form.programIncrement) {
+        updatedDeliverable.programIncrement = form.programIncrement.value;
+      }
+      if (form.workType) {
+        updatedDeliverable.workType = form.workType.value;
+      }
+      
+      // Add additional detailed fields
+      updatedDeliverable.scope = form.scope.value || '';
+      updatedDeliverable.dependencies = form.dependencies.value || '';
+      updatedDeliverable.risks = form.risks.value || '';
+      updatedDeliverable.businessValue = form.businessValue.value || '';
+      updatedDeliverable.businessProblem = form.businessProblem.value || '';
+      updatedDeliverable.benefits = form.benefits.value || '';
+      updatedDeliverable.userStory = form.userStory.value || '';
+      
+      // Update the deliverable in the array
+      this.deliverables[index] = updatedDeliverable;
+      
+      // Save to storage
+      this.saveToStorage();
+      
+      // Reset modified flag
+      this.formModified = false;
+      
+      // Close modal and refresh view
+      this.closeAllModals();
+      this.renderCurrentView();
+    }
     
     // Delete deliverable
     deleteDeliverable(id) {
@@ -2070,6 +2479,10 @@ saveDeliverableEdits() {
         if (deliverable.status === 'Completed') statusClass = 'status-completed';
         else if (deliverable.status === 'In Progress') statusClass = 'status-in-progress';
         
+        // Get pillar tag class
+        const pillarClass = deliverable.securityPillar ? 
+          this.pillarTagClasses[deliverable.securityPillar] : 'tag-pillar';
+        
         card.innerHTML = `
           <div class="deliverable-header">
             <h3 class="deliverable-title">${deliverable.title}</h3>
@@ -2083,6 +2496,7 @@ saveDeliverableEdits() {
             ${deliverable.assignee ? `<span class="tag tag-assignee">${deliverable.assignee}</span>` : ''}
             ${deliverable.priority ? `<span class="tag tag-priority">${deliverable.priority}</span>` : ''}
             ${deliverable.category ? `<span class="tag tag-category">${deliverable.category}</span>` : ''}
+            ${deliverable.securityPillar ? `<span class="tag ${pillarClass}">${deliverable.securityPillar}</span>` : ''}
           </div>
         `;
         
@@ -2114,6 +2528,10 @@ saveDeliverableEdits() {
         card.className = 'kanban-card';
         card.onclick = () => this.showDetailModal(deliverable);
         
+        // Get pillar tag class
+        const pillarClass = deliverable.securityPillar ? 
+          this.pillarTagClasses[deliverable.securityPillar] : 'tag-pillar';
+        
         card.innerHTML = `
           <h3 class="kanban-card-title">${deliverable.title}</h3>
           <p class="kanban-card-description">${deliverable.description || ''}</p>
@@ -2123,6 +2541,7 @@ saveDeliverableEdits() {
           <div>
             ${deliverable.assignee ? `<span class="tag tag-assignee">${deliverable.assignee}</span>` : ''}
             ${deliverable.priority ? `<span class="tag tag-priority">${deliverable.priority}</span>` : ''}
+            ${deliverable.securityPillar ? `<span class="tag ${pillarClass}">${deliverable.securityPillar}</span>` : ''}
           </div>
         `;
         
