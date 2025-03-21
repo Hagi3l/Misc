@@ -1719,24 +1719,143 @@
     
     // Show Add Deliverable button
     showAddDeliverableButton() {
-      const actionButtons = document.getElementById('action-buttons');
-      // Clear current buttons
-      actionButtons.innerHTML = '';
-      
-      // Add the new deliverable button
-      const addButton = document.createElement('button');
-      addButton.className = 'primary';
-      addButton.innerHTML = '<span>Add Deliverable</span>';
-      addButton.addEventListener('click', () => this.showAddModal());
-      actionButtons.appendChild(addButton);
-      
-      // Add export button
-      const exportButton = document.createElement('button');
-      exportButton.className = 'success';
-      exportButton.innerHTML = '<span>Export CSV</span>';
-      exportButton.addEventListener('click', () => this.exportToCSV());
-      actionButtons.appendChild(exportButton);
+  const actionButtons = document.getElementById('action-buttons');
+  // Clear current buttons
+  actionButtons.innerHTML = '';
+  
+  // Add the new deliverable button
+  const addButton = document.createElement('button');
+  addButton.className = 'primary';
+  addButton.innerHTML = '<span>Add Deliverable</span>';
+  addButton.addEventListener('click', () => this.showAddModal());
+  actionButtons.appendChild(addButton);
+  
+  // Add CSV upload button
+  const uploadLabel = document.createElement('label');
+  uploadLabel.setAttribute('for', 'refresh-file-upload');
+  uploadLabel.className = 'primary';
+  uploadLabel.style.padding = '0.5rem 1rem';
+  uploadLabel.style.borderRadius = '0.375rem';
+  uploadLabel.style.cursor = 'pointer';
+  uploadLabel.style.display = 'flex';
+  uploadLabel.style.alignItems = 'center';
+  uploadLabel.style.gap = '0.25rem';
+  uploadLabel.innerHTML = '<span>Upload CSV</span>';
+  
+  const uploadInput = document.createElement('input');
+  uploadInput.id = 'refresh-file-upload';
+  uploadInput.type = 'file';
+  uploadInput.accept = '.csv';
+  uploadInput.className = 'file-input';
+  uploadInput.addEventListener('change', (e) => this.handleRefreshUpload(e));
+  
+  uploadLabel.appendChild(uploadInput);
+  actionButtons.appendChild(uploadLabel);
+  
+  // Add export button
+  const exportButton = document.createElement('button');
+  exportButton.className = 'success';
+  exportButton.innerHTML = '<span>Export CSV</span>';
+  exportButton.addEventListener('click', () => this.exportToCSV());
+  actionButtons.appendChild(exportButton);
+}
+
+// 2. Add this new method to handle refreshing data with a new CSV upload
+// Add this method to the KanbanTimelinePlanner class:
+
+handleRefreshUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Check if it's a CSV file
+  if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+    this.showError('Please upload a CSV file');
+    return;
+  }
+  
+  // Confirm before replacing existing data
+  if (this.deliverables.length > 0) {
+    if (!confirm('This will replace all existing data. Are you sure you want to continue?')) {
+      // Reset the file input
+      event.target.value = '';
+      return;
     }
+  }
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      // Parse CSV with improved CSV parser
+      const csvData = this.parseCSVRobust(e.target.result);
+      
+      if (csvData.length === 0) {
+        this.showError('The CSV file appears to be empty or invalid.');
+        return;
+      }
+      
+      // Process the data
+      this.deliverables = csvData.map((item, index) => {
+        // Use our custom parseDate function to handle Australian date format
+        const startDate = this.parseDate(item.startDate);
+        
+        // For end date: if it's not provided, use start date + 7 days
+        let endDate;
+        if (item.endDate) {
+          endDate = this.parseDate(item.endDate);
+        } else {
+          endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 7);
+        }
+        
+        return {
+          id: item.id || `task-${index + 1}`,
+          title: item.title || `Task ${index + 1}`,
+          description: item.description || '',
+          startDate: startDate,
+          endDate: endDate,
+          status: item.status || 'To Do',
+          assignee: item.assignee || '',
+          priority: item.priority || 'Medium',
+          category: item.category || '',
+          securityPillar: item.securityPillar || '',
+          programIncrement: item.programIncrement || '',
+          workType: item.workType || '',
+          scope: item.scope || '',
+          dependencies: item.dependencies || '',
+          risks: item.risks || '',
+          businessValue: item.businessValue || '',
+          businessProblem: item.businessProblem || '',
+          benefits: item.benefits || '',
+          userStory: item.userStory || ''
+        };
+      });
+      
+      // Reset the file input
+      event.target.value = '';
+      
+      // Clear any error messages
+      this.clearError();
+      
+      // Save to storage
+      this.saveToStorage();
+      
+      // Update UI
+      this.renderCurrentView();
+      
+      // Show success message
+      alert('Data refreshed successfully from CSV!');
+    } catch (error) {
+      console.error('Error parsing CSV:', error);
+      this.showError('Error parsing CSV file. Please check the format and try again.');
+    }
+  };
+  
+  reader.onerror = () => {
+    this.showError('Failed to read the file. Please try again.');
+  };
+  
+  reader.readAsText(file);
+}
     
     // Parse date from multiple formats (prioritizing Australian format)
     parseDate(dateString) {
